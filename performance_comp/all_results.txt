@@ -1,0 +1,95 @@
+Performance Comparison Experiment Results
+Run completed: 2026-02-16 00:32:58
+======================================================================
+
+Model        Encoding       Kernel   N_Pass   Accuracy  
+----------------------------------------------------
+encoded      fixed_rank     3        1        91.80%
+encoded      fixed_rank     3        2        93.30%
+encoded      fixed_rank     3        3        92.10%
+encoded      fixed_rank     3        4        89.20%
+encoded      fixed_vector   3        1        91.40%
+encoded      fixed_vector   3        2        94.40%
+encoded      fixed_vector   3        3        93.90%
+encoded      fixed_vector   3        4        94.00%
+encoded      learned_rank   3        1        92.00%
+encoded      learned_rank   3        2        92.90%
+encoded      learned_rank   3        3        90.40%
+encoded      learned_rank   3        4        89.30%
+encoded      fixed_rank     4        1        89.50%
+encoded      fixed_rank     4        2        88.80%
+encoded      fixed_rank     4        3        87.60%
+encoded      fixed_rank     4        4        85.30%
+encoded      fixed_vector   4        1        89.00%
+encoded      fixed_vector   4        2        90.80%
+encoded      fixed_vector   4        3        87.20%
+encoded      fixed_vector   4        4        88.70%
+encoded      learned_rank   4        1        90.30%
+encoded      learned_rank   4        2        90.00%
+encoded      learned_rank   4        3        83.90%
+encoded      learned_rank   4        4        85.00%
+encoded      fixed_rank     5        1        90.80%
+encoded      fixed_rank     5        2        91.60%
+encoded      fixed_rank     5        3        90.70%
+encoded      fixed_rank     5        4        88.70%
+encoded      fixed_vector   5        1        90.80%
+encoded      fixed_vector   5        2        92.90%
+encoded      fixed_vector   5        3        92.80%
+encoded      fixed_vector   5        4        93.20%
+encoded      learned_rank   5        1        91.00%
+encoded      learned_rank   5        2        92.30%
+encoded      learned_rank   5        3        91.50%
+encoded      learned_rank   5        4        78.80%
+conventional -              3        -        94.60%
+conventional -              4        -        94.60%
+conventional -              5        -        94.30%
+
+======================================================================
+
+Summary by Kernel Size:
+----------------------------------------
+
+Kernel 3x3:
+  fixed_rank n=1: 91.80%
+  fixed_rank n=2: 93.30%
+  fixed_rank n=3: 92.10%
+  fixed_rank n=4: 89.20%
+  fixed_vector n=1: 91.40%
+  fixed_vector n=2: 94.40%
+  fixed_vector n=3: 93.90%
+  fixed_vector n=4: 94.00%
+  learned_rank n=1: 92.00%
+  learned_rank n=2: 92.90%
+  learned_rank n=3: 90.40%
+  learned_rank n=4: 89.30%
+  Conventional: 94.60%
+
+Kernel 4x4:
+  fixed_rank n=1: 89.50%
+  fixed_rank n=2: 88.80%
+  fixed_rank n=3: 87.60%
+  fixed_rank n=4: 85.30%
+  fixed_vector n=1: 89.00%
+  fixed_vector n=2: 90.80%
+  fixed_vector n=3: 87.20%
+  fixed_vector n=4: 88.70%
+  learned_rank n=1: 90.30%
+  learned_rank n=2: 90.00%
+  learned_rank n=3: 83.90%
+  learned_rank n=4: 85.00%
+  Conventional: 94.60%
+
+Kernel 5x5:
+  fixed_rank n=1: 90.80%
+  fixed_rank n=2: 91.60%
+  fixed_rank n=3: 90.70%
+  fixed_rank n=4: 88.70%
+  fixed_vector n=1: 90.80%
+  fixed_vector n=2: 92.90%
+  fixed_vector n=3: 92.80%
+  fixed_vector n=4: 93.20%
+  learned_rank n=1: 91.00%
+  learned_rank n=2: 92.30%
+  learned_rank n=3: 91.50%
+  learned_rank n=4: 78.80%
+  Conventional: 94.30%

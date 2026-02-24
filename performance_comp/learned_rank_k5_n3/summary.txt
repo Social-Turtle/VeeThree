@@ -1,0 +1,42 @@
+Experiment: learned_rank (kernel=5, n_pass=3)
+============================================================
+
+CONFIGURATION
+----------------------------------------
+Model type: encoded
+Conv1 kernel size: 5x5
+Encoding: learned_rank
+N_pass: 3
+Conv2: 16 filters (3x3)
+
+RESULTS
+----------------------------------------
+Final Test Accuracy: 91.50%
+Best Test Accuracy: 92.10%
+Training Time: 16.0s
+
+PER-DIGIT ACCURACY
+----------------------------------------
+  Digit 0: 94.12%
+  Digit 1: 97.62%
+  Digit 2: 92.24%
+  Digit 3: 95.33%
+  Digit 4: 94.55%
+  Digit 5: 90.80%
+  Digit 6: 87.36%
+  Digit 7: 86.87%
+  Digit 8: 83.15%
+  Digit 9: 89.36%
+
+TRAINING HISTORY
+----------------------------------------
+  Epoch 1: Loss=1.6539, Train=53.0%, Test=80.7%
+  Epoch 2: Loss=0.5505, Train=84.5%, Test=85.9%
+  Epoch 3: Loss=0.3947, Train=88.0%, Test=88.9%
+  Epoch 4: Loss=0.3418, Train=89.5%, Test=89.8%
+  Epoch 5: Loss=0.3115, Train=90.5%, Test=89.8%
+  Epoch 6: Loss=0.2882, Train=91.1%, Test=90.8%
+  Epoch 7: Loss=0.2702, Train=91.6%, Test=91.7%
+  Epoch 8: Loss=0.2549, Train=92.2%, Test=91.7%
+  Epoch 9: Loss=0.2439, Train=92.4%, Test=92.1%
+  Epoch 10: Loss=0.2347, Train=92.7%, Test=91.5%

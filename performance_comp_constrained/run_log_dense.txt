@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/performance_comp_constrained/run_experiment.py", line 88, in <module>
+    run_dense_layer_experiments()
+  File "/Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/performance_comp_constrained/run_experiment.py", line 70, in run_dense_layer_experiments
+    model = EncodedCNN(encoding_type=encoding_type, n_pass=n_pass, conv1_kernel_size=kernel_size, dense_hidden_size=dense_size)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: EncodedCNN.__init__() got an unexpected keyword argument 'dense_hidden_size'

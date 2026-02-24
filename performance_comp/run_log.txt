@@ -1,0 +1,1756 @@
+Using device: cpu
+Starting experiments at 2026-02-16 00:23:32
+
+############################################################
+# Experiment 1/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=3 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 1
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,246
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.6245, Train=51.9%, Test=73.2%, Time=1.2s
+Epoch 2/10: Loss=0.6905, Train=82.0%, Test=83.5%, Time=1.3s
+Epoch 3/10: Loss=0.4668, Train=86.8%, Test=87.0%, Time=1.2s
+Epoch 4/10: Loss=0.3802, Train=89.1%, Test=87.7%, Time=1.2s
+Epoch 5/10: Loss=0.3303, Train=90.4%, Test=89.3%, Time=1.2s
+Epoch 6/10: Loss=0.2973, Train=91.3%, Test=90.1%, Time=1.2s
+Epoch 7/10: Loss=0.2729, Train=92.0%, Test=90.2%, Time=1.2s
+Epoch 8/10: Loss=0.2540, Train=92.5%, Test=91.4%, Time=1.2s
+Epoch 9/10: Loss=0.2393, Train=92.9%, Test=91.6%, Time=1.2s
+Epoch 10/10: Loss=0.2261, Train=93.4%, Test=91.8%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 91.80%
+
+############################################################
+# Experiment 2/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=3 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 2
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,246
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.8481, Train=49.0%, Test=71.9%, Time=1.2s
+Epoch 2/10: Loss=0.7571, Train=82.6%, Test=85.4%, Time=1.2s
+Epoch 3/10: Loss=0.4278, Train=88.8%, Test=88.7%, Time=1.2s
+Epoch 4/10: Loss=0.3287, Train=90.6%, Test=90.3%, Time=1.2s
+Epoch 5/10: Loss=0.2806, Train=92.0%, Test=91.3%, Time=1.2s
+Epoch 6/10: Loss=0.2518, Train=92.8%, Test=91.4%, Time=1.2s
+Epoch 7/10: Loss=0.2314, Train=93.3%, Test=91.8%, Time=1.2s
+Epoch 8/10: Loss=0.2159, Train=93.6%, Test=92.6%, Time=1.2s
+Epoch 9/10: Loss=0.2057, Train=94.0%, Test=92.8%, Time=1.2s
+Epoch 10/10: Loss=0.1964, Train=94.2%, Test=93.3%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 93.30%
+
+############################################################
+# Experiment 3/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=3 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 3
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,246
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.9714, Train=43.9%, Test=62.8%, Time=1.2s
+Epoch 2/10: Loss=0.8962, Train=80.9%, Test=82.4%, Time=1.2s
+Epoch 3/10: Loss=0.4565, Train=88.4%, Test=87.7%, Time=1.2s
+Epoch 4/10: Loss=0.3412, Train=90.8%, Test=89.6%, Time=1.2s
+Epoch 5/10: Loss=0.2880, Train=91.9%, Test=90.1%, Time=1.2s
+Epoch 6/10: Loss=0.2570, Train=92.6%, Test=90.7%, Time=1.2s
+Epoch 7/10: Loss=0.2360, Train=93.3%, Test=91.4%, Time=1.2s
+Epoch 8/10: Loss=0.2219, Train=93.6%, Test=91.6%, Time=1.2s
+Epoch 9/10: Loss=0.2093, Train=94.0%, Test=91.8%, Time=1.2s
+Epoch 10/10: Loss=0.1987, Train=94.3%, Test=92.1%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 92.10%
+
+############################################################
+# Experiment 4/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=3 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 4
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,246
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.0750, Train=38.0%, Test=49.0%, Time=1.2s
+Epoch 2/10: Loss=1.3028, Train=65.6%, Test=72.3%, Time=1.2s
+Epoch 3/10: Loss=0.8261, Train=77.1%, Test=71.8%, Time=1.2s
+Epoch 4/10: Loss=0.6384, Train=81.8%, Test=81.8%, Time=1.2s
+Epoch 5/10: Loss=0.5306, Train=85.0%, Test=83.4%, Time=1.2s
+Epoch 6/10: Loss=0.4577, Train=87.0%, Test=84.5%, Time=1.2s
+Epoch 7/10: Loss=0.4059, Train=88.4%, Test=86.2%, Time=1.2s
+Epoch 8/10: Loss=0.3694, Train=89.4%, Test=87.6%, Time=1.2s
+Epoch 9/10: Loss=0.3393, Train=90.3%, Test=88.6%, Time=1.2s
+Epoch 10/10: Loss=0.3156, Train=91.1%, Test=89.2%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 89.20%
+
+############################################################
+# Experiment 5/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=3 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 1
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,246
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.7552, Train=51.3%, Test=69.9%, Time=1.2s
+Epoch 2/10: Loss=0.7664, Train=80.1%, Test=82.2%, Time=1.2s
+Epoch 3/10: Loss=0.4962, Train=86.0%, Test=84.1%, Time=1.2s
+Epoch 4/10: Loss=0.3957, Train=88.5%, Test=85.6%, Time=1.2s
+Epoch 5/10: Loss=0.3383, Train=90.1%, Test=89.4%, Time=1.2s
+Epoch 6/10: Loss=0.3035, Train=90.9%, Test=89.5%, Time=1.2s
+Epoch 7/10: Loss=0.2783, Train=91.9%, Test=90.4%, Time=1.2s
+Epoch 8/10: Loss=0.2603, Train=92.3%, Test=90.6%, Time=1.2s
+Epoch 9/10: Loss=0.2449, Train=93.0%, Test=90.9%, Time=1.2s
+Epoch 10/10: Loss=0.2335, Train=93.0%, Test=91.4%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 91.40%
+
+############################################################
+# Experiment 6/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=3 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 2
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,246
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.1059, Train=68.5%, Test=83.0%, Time=1.2s
+Epoch 2/10: Loss=0.4134, Train=88.2%, Test=87.6%, Time=1.2s
+Epoch 3/10: Loss=0.3014, Train=91.2%, Test=90.6%, Time=1.2s
+Epoch 4/10: Loss=0.2497, Train=92.5%, Test=91.3%, Time=1.2s
+Epoch 5/10: Loss=0.2211, Train=93.4%, Test=92.7%, Time=1.2s
+Epoch 6/10: Loss=0.2003, Train=93.9%, Test=93.3%, Time=1.2s
+Epoch 7/10: Loss=0.1856, Train=94.4%, Test=93.9%, Time=1.2s
+Epoch 8/10: Loss=0.1735, Train=94.7%, Test=94.2%, Time=1.2s
+Epoch 9/10: Loss=0.1640, Train=95.1%, Test=93.9%, Time=1.2s
+Epoch 10/10: Loss=0.1563, Train=95.3%, Test=94.4%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 94.40%
+
+############################################################
+# Experiment 7/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=3 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 3
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,246
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.0103, Train=70.2%, Test=84.4%, Time=1.2s
+Epoch 2/10: Loss=0.3245, Train=90.6%, Test=89.5%, Time=1.2s
+Epoch 3/10: Loss=0.2456, Train=92.5%, Test=90.6%, Time=1.2s
+Epoch 4/10: Loss=0.2084, Train=93.8%, Test=91.6%, Time=1.2s
+Epoch 5/10: Loss=0.1877, Train=94.5%, Test=92.4%, Time=1.2s
+Epoch 6/10: Loss=0.1694, Train=95.1%, Test=92.6%, Time=1.2s
+Epoch 7/10: Loss=0.1581, Train=95.2%, Test=93.3%, Time=1.2s
+Epoch 8/10: Loss=0.1474, Train=95.8%, Test=93.7%, Time=1.2s
+Epoch 9/10: Loss=0.1387, Train=96.1%, Test=93.8%, Time=1.2s
+Epoch 10/10: Loss=0.1324, Train=96.1%, Test=93.9%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 93.90%
+
+############################################################
+# Experiment 8/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=3 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 4
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,246
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.1302, Train=66.1%, Test=78.7%, Time=1.2s
+Epoch 2/10: Loss=0.4138, Train=88.2%, Test=88.8%, Time=1.2s
+Epoch 3/10: Loss=0.3054, Train=91.0%, Test=89.5%, Time=1.2s
+Epoch 4/10: Loss=0.2596, Train=92.1%, Test=91.8%, Time=1.2s
+Epoch 5/10: Loss=0.2323, Train=93.0%, Test=92.2%, Time=1.2s
+Epoch 6/10: Loss=0.2154, Train=93.5%, Test=92.9%, Time=1.2s
+Epoch 7/10: Loss=0.2011, Train=94.0%, Test=91.9%, Time=1.2s
+Epoch 8/10: Loss=0.1905, Train=94.4%, Test=93.3%, Time=1.2s
+Epoch 9/10: Loss=0.1805, Train=94.8%, Test=93.2%, Time=1.2s
+Epoch 10/10: Loss=0.1726, Train=94.9%, Test=94.0%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 94.00%
+
+############################################################
+# Experiment 9/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=3 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 1
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,250
+Trainable parameters: 53,214
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.5937, Train=53.1%, Test=76.0%, Time=1.4s
+Epoch 2/10: Loss=0.6012, Train=81.8%, Test=83.8%, Time=1.4s
+Epoch 3/10: Loss=0.4113, Train=87.2%, Test=86.6%, Time=1.4s
+Epoch 4/10: Loss=0.3347, Train=89.5%, Test=87.4%, Time=1.4s
+Epoch 5/10: Loss=0.2913, Train=91.1%, Test=89.4%, Time=1.4s
+Epoch 6/10: Loss=0.2613, Train=92.1%, Test=89.1%, Time=1.4s
+Epoch 7/10: Loss=0.2387, Train=92.7%, Test=90.9%, Time=1.4s
+Epoch 8/10: Loss=0.2219, Train=93.2%, Test=90.5%, Time=1.4s
+Epoch 9/10: Loss=0.2077, Train=93.5%, Test=92.5%, Time=1.4s
+Epoch 10/10: Loss=0.1944, Train=94.0%, Test=92.0%, Time=1.4s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 92.00%
+
+############################################################
+# Experiment 10/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=3 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 2
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,254
+Trainable parameters: 53,218
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.4310, Train=60.0%, Test=79.3%, Time=1.5s
+Epoch 2/10: Loss=0.4724, Train=87.3%, Test=87.4%, Time=1.5s
+Epoch 3/10: Loss=0.3158, Train=90.8%, Test=88.9%, Time=1.5s
+Epoch 4/10: Loss=0.2615, Train=92.2%, Test=91.1%, Time=1.5s
+Epoch 5/10: Loss=0.2287, Train=93.2%, Test=92.4%, Time=1.5s
+Epoch 6/10: Loss=0.2090, Train=93.7%, Test=91.6%, Time=1.5s
+Epoch 7/10: Loss=0.1944, Train=94.2%, Test=92.1%, Time=1.5s
+Epoch 8/10: Loss=0.1824, Train=94.5%, Test=93.5%, Time=1.5s
+Epoch 9/10: Loss=0.1719, Train=94.8%, Test=93.5%, Time=1.5s
+Epoch 10/10: Loss=0.1651, Train=95.0%, Test=92.9%, Time=1.5s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 92.90%
+
+############################################################
+# Experiment 11/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=3 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 3
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,258
+Trainable parameters: 53,222
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.8671, Train=50.5%, Test=75.5%, Time=1.6s
+Epoch 2/10: Loss=0.6504, Train=82.8%, Test=83.9%, Time=1.6s
+Epoch 3/10: Loss=0.4265, Train=87.4%, Test=88.1%, Time=1.6s
+Epoch 4/10: Loss=0.3570, Train=89.1%, Test=87.9%, Time=1.6s
+Epoch 5/10: Loss=0.3138, Train=90.8%, Test=88.9%, Time=1.6s
+Epoch 6/10: Loss=0.2881, Train=91.3%, Test=89.7%, Time=1.6s
+Epoch 7/10: Loss=0.2660, Train=91.8%, Test=89.7%, Time=1.6s
+Epoch 8/10: Loss=0.2477, Train=92.5%, Test=90.3%, Time=1.6s
+Epoch 9/10: Loss=0.2341, Train=92.7%, Test=91.2%, Time=1.6s
+Epoch 10/10: Loss=0.2236, Train=93.1%, Test=90.4%, Time=1.6s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 90.40%
+
+############################################################
+# Experiment 12/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=3 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 4
+Conv1: 4 fixed edge filters (3x3)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,262
+Trainable parameters: 53,226
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.3001, Train=12.1%, Test=23.3%, Time=1.7s
+Epoch 2/10: Loss=2.2012, Train=29.1%, Test=41.3%, Time=1.6s
+Epoch 3/10: Loss=1.3460, Train=61.8%, Test=69.2%, Time=1.6s
+Epoch 4/10: Loss=0.7498, Train=76.3%, Test=73.6%, Time=1.6s
+Epoch 5/10: Loss=0.6021, Train=80.9%, Test=78.1%, Time=1.6s
+Epoch 6/10: Loss=0.5092, Train=83.9%, Test=80.6%, Time=1.6s
+Epoch 7/10: Loss=0.4390, Train=86.2%, Test=83.7%, Time=1.6s
+Epoch 8/10: Loss=0.3824, Train=88.2%, Test=86.7%, Time=1.6s
+Epoch 9/10: Loss=0.3396, Train=89.6%, Test=88.4%, Time=1.6s
+Epoch 10/10: Loss=0.3063, Train=90.6%, Test=89.3%, Time=1.6s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 89.30%
+
+############################################################
+# Experiment 13/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=4 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 1
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,274
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.6937, Train=53.1%, Test=70.4%, Time=1.4s
+Epoch 2/10: Loss=0.7181, Train=81.2%, Test=81.7%, Time=1.5s
+Epoch 3/10: Loss=0.4976, Train=85.2%, Test=85.3%, Time=1.4s
+Epoch 4/10: Loss=0.4244, Train=87.0%, Test=85.3%, Time=1.4s
+Epoch 5/10: Loss=0.3831, Train=88.4%, Test=87.1%, Time=1.4s
+Epoch 6/10: Loss=0.3540, Train=89.1%, Test=87.2%, Time=1.4s
+Epoch 7/10: Loss=0.3308, Train=90.2%, Test=88.4%, Time=1.4s
+Epoch 8/10: Loss=0.3135, Train=90.5%, Test=88.2%, Time=1.4s
+Epoch 9/10: Loss=0.2976, Train=90.9%, Test=88.9%, Time=1.4s
+Epoch 10/10: Loss=0.2865, Train=91.3%, Test=89.5%, Time=1.4s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 89.50%
+
+############################################################
+# Experiment 14/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=4 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 2
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,274
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.8748, Train=48.1%, Test=72.4%, Time=1.4s
+Epoch 2/10: Loss=0.7976, Train=81.2%, Test=82.6%, Time=1.4s
+Epoch 3/10: Loss=0.4749, Train=86.6%, Test=85.1%, Time=1.4s
+Epoch 4/10: Loss=0.3871, Train=88.7%, Test=86.0%, Time=1.4s
+Epoch 5/10: Loss=0.3436, Train=89.4%, Test=86.9%, Time=1.4s
+Epoch 6/10: Loss=0.3154, Train=90.3%, Test=88.2%, Time=1.4s
+Epoch 7/10: Loss=0.2959, Train=91.0%, Test=88.0%, Time=1.4s
+Epoch 8/10: Loss=0.2781, Train=91.7%, Test=88.8%, Time=1.4s
+Epoch 9/10: Loss=0.2667, Train=91.9%, Test=88.9%, Time=1.4s
+Epoch 10/10: Loss=0.2567, Train=92.3%, Test=88.8%, Time=1.4s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 88.80%
+
+############################################################
+# Experiment 15/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=4 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 3
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,274
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.1412, Train=29.9%, Test=46.8%, Time=1.4s
+Epoch 2/10: Loss=1.4561, Train=65.1%, Test=70.4%, Time=1.4s
+Epoch 3/10: Loss=0.8046, Train=79.7%, Test=77.0%, Time=1.4s
+Epoch 4/10: Loss=0.5592, Train=84.2%, Test=82.4%, Time=1.4s
+Epoch 5/10: Loss=0.4558, Train=86.8%, Test=82.4%, Time=1.4s
+Epoch 6/10: Loss=0.4043, Train=88.0%, Test=84.9%, Time=1.4s
+Epoch 7/10: Loss=0.3681, Train=89.0%, Test=85.7%, Time=1.4s
+Epoch 8/10: Loss=0.3422, Train=89.7%, Test=86.3%, Time=1.4s
+Epoch 9/10: Loss=0.3242, Train=90.1%, Test=87.1%, Time=1.4s
+Epoch 10/10: Loss=0.3097, Train=90.6%, Test=87.6%, Time=1.4s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 87.60%
+
+############################################################
+# Experiment 16/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=4 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 4
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,274
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.2077, Train=26.7%, Test=39.4%, Time=1.4s
+Epoch 2/10: Loss=1.7803, Train=55.1%, Test=60.3%, Time=1.4s
+Epoch 3/10: Loss=1.1393, Train=71.0%, Test=71.2%, Time=1.4s
+Epoch 4/10: Loss=0.7923, Train=78.0%, Test=77.4%, Time=1.4s
+Epoch 5/10: Loss=0.6338, Train=81.7%, Test=79.7%, Time=1.3s
+Epoch 6/10: Loss=0.5414, Train=84.0%, Test=81.6%, Time=1.3s
+Epoch 7/10: Loss=0.4801, Train=86.0%, Test=83.1%, Time=1.3s
+Epoch 8/10: Loss=0.4377, Train=87.1%, Test=83.3%, Time=1.4s
+Epoch 9/10: Loss=0.4053, Train=87.9%, Test=84.8%, Time=1.4s
+Epoch 10/10: Loss=0.3818, Train=88.6%, Test=85.3%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 85.30%
+
+############################################################
+# Experiment 17/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=4 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 1
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,274
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.8079, Train=47.6%, Test=68.4%, Time=1.4s
+Epoch 2/10: Loss=0.7975, Train=78.8%, Test=81.3%, Time=1.4s
+Epoch 3/10: Loss=0.5318, Train=84.4%, Test=83.6%, Time=1.4s
+Epoch 4/10: Loss=0.4475, Train=86.3%, Test=84.4%, Time=1.4s
+Epoch 5/10: Loss=0.3997, Train=87.9%, Test=86.1%, Time=1.3s
+Epoch 6/10: Loss=0.3673, Train=89.0%, Test=87.1%, Time=1.3s
+Epoch 7/10: Loss=0.3441, Train=89.4%, Test=87.7%, Time=1.4s
+Epoch 8/10: Loss=0.3251, Train=90.1%, Test=88.3%, Time=1.3s
+Epoch 9/10: Loss=0.3096, Train=90.7%, Test=88.5%, Time=1.4s
+Epoch 10/10: Loss=0.2971, Train=90.9%, Test=89.0%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 89.00%
+
+############################################################
+# Experiment 18/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=4 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 2
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,274
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.3723, Train=58.4%, Test=78.9%, Time=1.4s
+Epoch 2/10: Loss=0.5066, Train=85.0%, Test=85.3%, Time=1.4s
+Epoch 3/10: Loss=0.3716, Train=88.6%, Test=87.7%, Time=1.4s
+Epoch 4/10: Loss=0.3169, Train=90.1%, Test=88.9%, Time=1.3s
+Epoch 5/10: Loss=0.2838, Train=91.2%, Test=89.3%, Time=1.3s
+Epoch 6/10: Loss=0.2591, Train=92.1%, Test=88.9%, Time=1.3s
+Epoch 7/10: Loss=0.2423, Train=92.6%, Test=90.2%, Time=1.3s
+Epoch 8/10: Loss=0.2278, Train=92.9%, Test=90.0%, Time=1.4s
+Epoch 9/10: Loss=0.2159, Train=93.3%, Test=90.5%, Time=1.3s
+Epoch 10/10: Loss=0.2066, Train=93.8%, Test=90.8%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 90.80%
+
+############################################################
+# Experiment 19/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=4 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 3
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,274
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.2852, Train=60.3%, Test=77.2%, Time=1.4s
+Epoch 2/10: Loss=0.5066, Train=84.3%, Test=84.2%, Time=1.3s
+Epoch 3/10: Loss=0.3828, Train=88.0%, Test=84.5%, Time=1.3s
+Epoch 4/10: Loss=0.3236, Train=90.0%, Test=86.8%, Time=1.3s
+Epoch 5/10: Loss=0.2901, Train=91.4%, Test=87.8%, Time=1.4s
+Epoch 6/10: Loss=0.2690, Train=91.6%, Test=87.9%, Time=1.3s
+Epoch 7/10: Loss=0.2481, Train=92.5%, Test=87.3%, Time=1.3s
+Epoch 8/10: Loss=0.2335, Train=92.9%, Test=88.9%, Time=1.3s
+Epoch 9/10: Loss=0.2191, Train=93.3%, Test=88.7%, Time=1.3s
+Epoch 10/10: Loss=0.2105, Train=93.5%, Test=87.2%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 87.20%
+
+############################################################
+# Experiment 20/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=4 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 4
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,274
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.5775, Train=49.2%, Test=67.1%, Time=1.4s
+Epoch 2/10: Loss=0.6527, Train=79.8%, Test=80.8%, Time=1.3s
+Epoch 3/10: Loss=0.4606, Train=85.8%, Test=84.9%, Time=1.3s
+Epoch 4/10: Loss=0.3894, Train=87.9%, Test=77.6%, Time=1.3s
+Epoch 5/10: Loss=0.3481, Train=89.2%, Test=84.6%, Time=1.4s
+Epoch 6/10: Loss=0.3170, Train=90.2%, Test=87.1%, Time=1.4s
+Epoch 7/10: Loss=0.2914, Train=90.9%, Test=87.8%, Time=1.4s
+Epoch 8/10: Loss=0.2773, Train=91.3%, Test=87.2%, Time=1.3s
+Epoch 9/10: Loss=0.2621, Train=91.7%, Test=88.8%, Time=1.3s
+Epoch 10/10: Loss=0.2508, Train=92.1%, Test=88.7%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 88.70%
+
+############################################################
+# Experiment 21/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=4 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 1
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,278
+Trainable parameters: 53,214
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.8529, Train=45.1%, Test=67.5%, Time=1.6s
+Epoch 2/10: Loss=0.6848, Train=81.2%, Test=84.0%, Time=1.6s
+Epoch 3/10: Loss=0.4552, Train=86.3%, Test=85.4%, Time=1.6s
+Epoch 4/10: Loss=0.3876, Train=87.9%, Test=86.8%, Time=1.6s
+Epoch 5/10: Loss=0.3444, Train=89.4%, Test=89.0%, Time=1.6s
+Epoch 6/10: Loss=0.3143, Train=90.2%, Test=89.4%, Time=1.6s
+Epoch 7/10: Loss=0.2899, Train=91.1%, Test=88.5%, Time=1.6s
+Epoch 8/10: Loss=0.2702, Train=91.7%, Test=89.1%, Time=1.6s
+Epoch 9/10: Loss=0.2571, Train=92.0%, Test=90.3%, Time=1.6s
+Epoch 10/10: Loss=0.2416, Train=92.8%, Test=90.3%, Time=1.6s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 90.30%
+
+############################################################
+# Experiment 22/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=4 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 2
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,282
+Trainable parameters: 53,218
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.7896, Train=46.0%, Test=71.6%, Time=1.7s
+Epoch 2/10: Loss=0.6405, Train=83.0%, Test=83.5%, Time=1.7s
+Epoch 3/10: Loss=0.3818, Train=88.7%, Test=86.6%, Time=1.7s
+Epoch 4/10: Loss=0.3139, Train=90.5%, Test=87.8%, Time=1.7s
+Epoch 5/10: Loss=0.2771, Train=91.4%, Test=87.5%, Time=1.7s
+Epoch 6/10: Loss=0.2525, Train=92.3%, Test=88.3%, Time=1.7s
+Epoch 7/10: Loss=0.2346, Train=92.8%, Test=89.4%, Time=1.7s
+Epoch 8/10: Loss=0.2199, Train=93.3%, Test=89.7%, Time=1.7s
+Epoch 9/10: Loss=0.2102, Train=93.5%, Test=89.8%, Time=1.7s
+Epoch 10/10: Loss=0.2011, Train=93.9%, Test=90.0%, Time=1.7s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 90.00%
+
+############################################################
+# Experiment 23/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=4 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 3
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,286
+Trainable parameters: 53,222
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.0766, Train=35.8%, Test=50.3%, Time=1.8s
+Epoch 2/10: Loss=1.1959, Train=65.2%, Test=66.7%, Time=1.8s
+Epoch 3/10: Loss=0.8134, Train=73.5%, Test=72.5%, Time=1.7s
+Epoch 4/10: Loss=0.6932, Train=77.1%, Test=75.6%, Time=1.7s
+Epoch 5/10: Loss=0.6134, Train=79.7%, Test=74.5%, Time=1.7s
+Epoch 6/10: Loss=0.5468, Train=82.4%, Test=78.3%, Time=1.7s
+Epoch 7/10: Loss=0.4910, Train=84.1%, Test=82.0%, Time=1.8s
+Epoch 8/10: Loss=0.4413, Train=85.8%, Test=83.1%, Time=1.7s
+Epoch 9/10: Loss=0.4007, Train=87.2%, Test=83.3%, Time=1.7s
+Epoch 10/10: Loss=0.3665, Train=88.3%, Test=83.9%, Time=1.7s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 83.90%
+
+############################################################
+# Experiment 24/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=4 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 4
+Conv1: 4 fixed edge filters (4x4)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,290
+Trainable parameters: 53,226
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.3022, Train=11.2%, Test=12.6%, Time=1.8s
+Epoch 2/10: Loss=2.2913, Train=13.2%, Test=15.4%, Time=1.8s
+Epoch 3/10: Loss=2.2415, Train=24.5%, Test=31.5%, Time=1.8s
+Epoch 4/10: Loss=1.8237, Train=51.8%, Test=56.8%, Time=1.8s
+Epoch 5/10: Loss=0.8865, Train=74.4%, Test=78.1%, Time=1.8s
+Epoch 6/10: Loss=0.5728, Train=82.5%, Test=79.5%, Time=1.8s
+Epoch 7/10: Loss=0.4717, Train=85.5%, Test=79.7%, Time=1.8s
+Epoch 8/10: Loss=0.4180, Train=87.2%, Test=82.7%, Time=1.8s
+Epoch 9/10: Loss=0.3839, Train=88.2%, Test=84.9%, Time=1.8s
+Epoch 10/10: Loss=0.3562, Train=88.8%, Test=85.0%, Time=1.8s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 85.00%
+
+############################################################
+# Experiment 25/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=5 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 1
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,310
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.7568, Train=51.3%, Test=73.1%, Time=1.3s
+Epoch 2/10: Loss=0.7238, Train=82.5%, Test=84.2%, Time=1.3s
+Epoch 3/10: Loss=0.4261, Train=88.2%, Test=86.7%, Time=1.3s
+Epoch 4/10: Loss=0.3358, Train=90.3%, Test=88.6%, Time=1.3s
+Epoch 5/10: Loss=0.2907, Train=91.4%, Test=87.9%, Time=1.3s
+Epoch 6/10: Loss=0.2638, Train=92.1%, Test=90.3%, Time=1.3s
+Epoch 7/10: Loss=0.2438, Train=92.6%, Test=91.4%, Time=1.3s
+Epoch 8/10: Loss=0.2291, Train=93.1%, Test=90.9%, Time=1.3s
+Epoch 9/10: Loss=0.2176, Train=93.5%, Test=90.9%, Time=1.3s
+Epoch 10/10: Loss=0.2085, Train=93.7%, Test=90.8%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 90.80%
+
+############################################################
+# Experiment 26/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=5 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 2
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,310
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.6859, Train=55.1%, Test=80.6%, Time=1.3s
+Epoch 2/10: Loss=0.5928, Train=86.0%, Test=85.4%, Time=1.3s
+Epoch 3/10: Loss=0.3803, Train=89.3%, Test=88.0%, Time=1.3s
+Epoch 4/10: Loss=0.3134, Train=90.8%, Test=88.6%, Time=1.3s
+Epoch 5/10: Loss=0.2775, Train=91.8%, Test=89.7%, Time=1.3s
+Epoch 6/10: Loss=0.2541, Train=92.7%, Test=89.6%, Time=1.3s
+Epoch 7/10: Loss=0.2361, Train=93.0%, Test=90.3%, Time=1.3s
+Epoch 8/10: Loss=0.2239, Train=93.5%, Test=91.3%, Time=1.3s
+Epoch 9/10: Loss=0.2138, Train=93.8%, Test=90.7%, Time=1.3s
+Epoch 10/10: Loss=0.2047, Train=94.0%, Test=91.6%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 91.60%
+
+############################################################
+# Experiment 27/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=5 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 3
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,310
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.9413, Train=44.3%, Test=63.7%, Time=1.3s
+Epoch 2/10: Loss=0.9154, Train=77.7%, Test=78.5%, Time=1.3s
+Epoch 3/10: Loss=0.5089, Train=86.3%, Test=84.8%, Time=1.3s
+Epoch 4/10: Loss=0.3797, Train=89.3%, Test=86.9%, Time=1.3s
+Epoch 5/10: Loss=0.3223, Train=90.5%, Test=89.5%, Time=1.3s
+Epoch 6/10: Loss=0.2854, Train=91.8%, Test=89.1%, Time=1.3s
+Epoch 7/10: Loss=0.2623, Train=92.3%, Test=90.6%, Time=1.3s
+Epoch 8/10: Loss=0.2460, Train=92.9%, Test=90.8%, Time=1.3s
+Epoch 9/10: Loss=0.2326, Train=93.1%, Test=90.9%, Time=1.3s
+Epoch 10/10: Loss=0.2221, Train=93.7%, Test=90.7%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 90.70%
+
+############################################################
+# Experiment 28/39
+############################################################
+
+============================================================
+Experiment: fixed_rank / kernel=5 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_rank
+N_pass: 4
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,310
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.0838, Train=37.0%, Test=46.6%, Time=1.3s
+Epoch 2/10: Loss=1.2461, Train=69.5%, Test=70.9%, Time=1.3s
+Epoch 3/10: Loss=0.7161, Train=81.0%, Test=79.0%, Time=1.3s
+Epoch 4/10: Loss=0.5263, Train=85.3%, Test=83.3%, Time=1.3s
+Epoch 5/10: Loss=0.4340, Train=87.5%, Test=83.6%, Time=1.3s
+Epoch 6/10: Loss=0.3791, Train=88.9%, Test=86.2%, Time=1.2s
+Epoch 7/10: Loss=0.3422, Train=89.9%, Test=87.2%, Time=1.3s
+Epoch 8/10: Loss=0.3172, Train=90.7%, Test=87.9%, Time=1.3s
+Epoch 9/10: Loss=0.2974, Train=91.2%, Test=88.6%, Time=1.3s
+Epoch 10/10: Loss=0.2807, Train=91.8%, Test=88.7%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 88.70%
+
+############################################################
+# Experiment 29/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=5 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 1
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,310
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.7123, Train=54.2%, Test=76.9%, Time=1.3s
+Epoch 2/10: Loss=0.6286, Train=85.2%, Test=87.5%, Time=1.3s
+Epoch 3/10: Loss=0.3920, Train=89.4%, Test=89.2%, Time=1.3s
+Epoch 4/10: Loss=0.3236, Train=90.7%, Test=89.3%, Time=1.3s
+Epoch 5/10: Loss=0.2877, Train=91.5%, Test=89.2%, Time=1.3s
+Epoch 6/10: Loss=0.2634, Train=92.3%, Test=89.4%, Time=1.3s
+Epoch 7/10: Loss=0.2467, Train=92.7%, Test=90.1%, Time=1.3s
+Epoch 8/10: Loss=0.2328, Train=93.0%, Test=90.7%, Time=1.3s
+Epoch 9/10: Loss=0.2212, Train=93.2%, Test=91.3%, Time=1.3s
+Epoch 10/10: Loss=0.2127, Train=93.5%, Test=90.8%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 90.80%
+
+############################################################
+# Experiment 30/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=5 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 2
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,310
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.1593, Train=65.5%, Test=81.1%, Time=1.3s
+Epoch 2/10: Loss=0.4213, Train=87.4%, Test=84.4%, Time=1.3s
+Epoch 3/10: Loss=0.3043, Train=91.1%, Test=88.2%, Time=1.3s
+Epoch 4/10: Loss=0.2552, Train=92.5%, Test=89.6%, Time=1.3s
+Epoch 5/10: Loss=0.2281, Train=93.1%, Test=91.0%, Time=1.3s
+Epoch 6/10: Loss=0.2076, Train=93.8%, Test=89.4%, Time=1.2s
+Epoch 7/10: Loss=0.1926, Train=94.4%, Test=91.1%, Time=1.3s
+Epoch 8/10: Loss=0.1802, Train=94.8%, Test=92.5%, Time=1.2s
+Epoch 9/10: Loss=0.1711, Train=95.0%, Test=92.4%, Time=1.3s
+Epoch 10/10: Loss=0.1644, Train=95.0%, Test=92.9%, Time=1.3s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 92.90%
+
+############################################################
+# Experiment 31/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=5 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 3
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,310
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.0750, Train=67.8%, Test=81.7%, Time=1.3s
+Epoch 2/10: Loss=0.3688, Train=88.7%, Test=85.6%, Time=1.2s
+Epoch 3/10: Loss=0.2747, Train=91.9%, Test=90.0%, Time=1.2s
+Epoch 4/10: Loss=0.2371, Train=92.9%, Test=90.6%, Time=1.2s
+Epoch 5/10: Loss=0.2109, Train=93.7%, Test=91.6%, Time=1.2s
+Epoch 6/10: Loss=0.1935, Train=94.2%, Test=93.0%, Time=1.2s
+Epoch 7/10: Loss=0.1790, Train=94.7%, Test=92.3%, Time=1.2s
+Epoch 8/10: Loss=0.1674, Train=95.0%, Test=92.8%, Time=1.2s
+Epoch 9/10: Loss=0.1592, Train=95.2%, Test=92.6%, Time=1.2s
+Epoch 10/10: Loss=0.1524, Train=95.5%, Test=92.8%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 92.80%
+
+############################################################
+# Experiment 32/39
+############################################################
+
+============================================================
+Experiment: fixed_vector / kernel=5 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: fixed_vector
+N_pass: 4
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,310
+Trainable parameters: 53,210
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=0.9800, Train=70.5%, Test=83.6%, Time=1.3s
+Epoch 2/10: Loss=0.3650, Train=89.1%, Test=88.8%, Time=1.3s
+Epoch 3/10: Loss=0.2908, Train=91.0%, Test=89.2%, Time=1.2s
+Epoch 4/10: Loss=0.2514, Train=92.6%, Test=90.7%, Time=1.2s
+Epoch 5/10: Loss=0.2264, Train=93.3%, Test=92.0%, Time=1.2s
+Epoch 6/10: Loss=0.2086, Train=93.9%, Test=92.0%, Time=1.2s
+Epoch 7/10: Loss=0.1945, Train=94.2%, Test=91.6%, Time=1.3s
+Epoch 8/10: Loss=0.1832, Train=94.4%, Test=90.6%, Time=1.3s
+Epoch 9/10: Loss=0.1738, Train=94.8%, Test=93.0%, Time=1.2s
+Epoch 10/10: Loss=0.1630, Train=95.2%, Test=93.2%, Time=1.2s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 93.20%
+
+############################################################
+# Experiment 33/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=5 / n_pass=1
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 1
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,314
+Trainable parameters: 53,214
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.5053, Train=59.0%, Test=77.9%, Time=1.5s
+Epoch 2/10: Loss=0.4936, Train=86.3%, Test=87.1%, Time=1.4s
+Epoch 3/10: Loss=0.3371, Train=90.2%, Test=89.3%, Time=1.4s
+Epoch 4/10: Loss=0.2835, Train=91.6%, Test=90.0%, Time=1.4s
+Epoch 5/10: Loss=0.2513, Train=92.1%, Test=89.7%, Time=1.4s
+Epoch 6/10: Loss=0.2290, Train=92.9%, Test=91.5%, Time=1.4s
+Epoch 7/10: Loss=0.2125, Train=93.3%, Test=91.4%, Time=1.4s
+Epoch 8/10: Loss=0.2003, Train=93.6%, Test=92.4%, Time=1.4s
+Epoch 9/10: Loss=0.1898, Train=94.1%, Test=91.6%, Time=1.6s
+Epoch 10/10: Loss=0.1810, Train=94.3%, Test=91.0%, Time=1.4s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 91.00%
+
+############################################################
+# Experiment 34/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=5 / n_pass=2
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 2
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,318
+Trainable parameters: 53,218
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.5406, Train=56.0%, Test=76.4%, Time=1.5s
+Epoch 2/10: Loss=0.5518, Train=84.3%, Test=84.6%, Time=1.5s
+Epoch 3/10: Loss=0.3691, Train=88.9%, Test=87.8%, Time=1.5s
+Epoch 4/10: Loss=0.3031, Train=91.0%, Test=88.9%, Time=1.5s
+Epoch 5/10: Loss=0.2661, Train=91.8%, Test=89.6%, Time=1.5s
+Epoch 6/10: Loss=0.2391, Train=92.9%, Test=89.9%, Time=1.5s
+Epoch 7/10: Loss=0.2198, Train=93.6%, Test=90.7%, Time=1.5s
+Epoch 8/10: Loss=0.2057, Train=93.9%, Test=91.0%, Time=1.5s
+Epoch 9/10: Loss=0.1957, Train=94.3%, Test=91.2%, Time=1.5s
+Epoch 10/10: Loss=0.1859, Train=94.5%, Test=92.3%, Time=1.5s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 92.30%
+
+############################################################
+# Experiment 35/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=5 / n_pass=3
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 3
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,322
+Trainable parameters: 53,222
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.6539, Train=53.0%, Test=80.7%, Time=1.6s
+Epoch 2/10: Loss=0.5505, Train=84.5%, Test=85.9%, Time=1.6s
+Epoch 3/10: Loss=0.3947, Train=88.0%, Test=88.9%, Time=1.6s
+Epoch 4/10: Loss=0.3418, Train=89.5%, Test=89.8%, Time=1.6s
+Epoch 5/10: Loss=0.3115, Train=90.5%, Test=89.8%, Time=1.6s
+Epoch 6/10: Loss=0.2882, Train=91.1%, Test=90.8%, Time=1.6s
+Epoch 7/10: Loss=0.2702, Train=91.6%, Test=91.7%, Time=1.6s
+Epoch 8/10: Loss=0.2549, Train=92.2%, Test=91.7%, Time=1.6s
+Epoch 9/10: Loss=0.2439, Train=92.4%, Test=92.1%, Time=1.6s
+Epoch 10/10: Loss=0.2347, Train=92.7%, Test=91.5%, Time=1.6s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 91.50%
+
+############################################################
+# Experiment 36/39
+############################################################
+
+============================================================
+Experiment: learned_rank / kernel=5 / n_pass=4
+============================================================
+
+============================================================
+EncodedCNN Summary
+============================================================
+Encoding: learned_rank
+N_pass: 4
+Conv1: 4 fixed edge filters (5x5)
+Pool1: LowestPassingMaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,326
+Trainable parameters: 53,226
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.3059, Train=10.9%, Test=12.6%, Time=1.7s
+Epoch 2/10: Loss=2.2976, Train=13.5%, Test=12.6%, Time=1.7s
+Epoch 3/10: Loss=2.2721, Train=21.7%, Test=21.7%, Time=1.7s
+Epoch 4/10: Loss=1.9400, Train=49.2%, Test=67.2%, Time=1.7s
+Epoch 5/10: Loss=0.8701, Train=74.2%, Test=76.2%, Time=1.7s
+Epoch 6/10: Loss=0.6362, Train=80.1%, Test=78.3%, Time=1.7s
+Epoch 7/10: Loss=0.5832, Train=81.5%, Test=78.9%, Time=1.7s
+Epoch 8/10: Loss=0.5448, Train=82.5%, Test=78.8%, Time=1.7s
+Epoch 9/10: Loss=0.5230, Train=83.4%, Test=81.1%, Time=1.7s
+Epoch 10/10: Loss=0.4942, Train=84.1%, Test=78.8%, Time=1.7s
+------------------------------------------------------------
+Training complete in 0.3 minutes
+
+Final Test Accuracy: 78.80%
+
+############################################################
+# Experiment 37/39
+############################################################
+
+============================================================
+Experiment: Conventional CNN / kernel=3
+============================================================
+
+============================================================
+ConventionalCNN Summary
+============================================================
+Conv1: 4 learned filters (3x3)
+Pool1: Standard MaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,250
+Trainable parameters: 53,250
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.9849, Train=38.5%, Test=63.3%, Time=1.4s
+Epoch 2/10: Loss=0.6299, Train=81.1%, Test=83.4%, Time=1.4s
+Epoch 3/10: Loss=0.3747, Train=88.5%, Test=87.7%, Time=1.4s
+Epoch 4/10: Loss=0.3016, Train=90.8%, Test=88.9%, Time=1.4s
+Epoch 5/10: Loss=0.2586, Train=92.3%, Test=91.2%, Time=1.4s
+Epoch 6/10: Loss=0.2258, Train=93.2%, Test=92.7%, Time=1.4s
+Epoch 7/10: Loss=0.2022, Train=94.1%, Test=92.9%, Time=1.4s
+Epoch 8/10: Loss=0.1823, Train=94.5%, Test=92.7%, Time=1.4s
+Epoch 9/10: Loss=0.1644, Train=95.1%, Test=92.9%, Time=1.4s
+Epoch 10/10: Loss=0.1525, Train=95.7%, Test=94.6%, Time=1.4s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 94.60%
+
+############################################################
+# Experiment 38/39
+############################################################
+
+============================================================
+Experiment: Conventional CNN / kernel=4
+============================================================
+
+============================================================
+ConventionalCNN Summary
+============================================================
+Conv1: 4 learned filters (4x4)
+Pool1: Standard MaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,278
+Trainable parameters: 53,278
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=2.1798, Train=30.8%, Test=58.6%, Time=1.4s
+Epoch 2/10: Loss=0.7075, Train=82.6%, Test=84.9%, Time=1.4s
+Epoch 3/10: Loss=0.3364, Train=90.4%, Test=90.0%, Time=1.4s
+Epoch 4/10: Loss=0.2695, Train=92.3%, Test=89.2%, Time=1.4s
+Epoch 5/10: Loss=0.2329, Train=93.6%, Test=93.4%, Time=1.4s
+Epoch 6/10: Loss=0.2044, Train=94.0%, Test=93.3%, Time=1.4s
+Epoch 7/10: Loss=0.1836, Train=94.7%, Test=93.3%, Time=1.4s
+Epoch 8/10: Loss=0.1693, Train=95.0%, Test=94.7%, Time=1.4s
+Epoch 9/10: Loss=0.1579, Train=95.3%, Test=95.5%, Time=1.4s
+Epoch 10/10: Loss=0.1462, Train=95.8%, Test=94.6%, Time=1.4s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 94.60%
+
+############################################################
+# Experiment 39/39
+############################################################
+
+============================================================
+Experiment: Conventional CNN / kernel=5
+============================================================
+
+============================================================
+ConventionalCNN Summary
+============================================================
+Conv1: 4 learned filters (5x5)
+Pool1: Standard MaxPool (2x2)
+Conv2: 16 learned filters (3x3)
+Pool2: Standard MaxPool (2x2)
+Dense: 400 → 128 → 10
+Total parameters: 53,314
+Trainable parameters: 53,314
+============================================================
+
+Loading training data...
+  Loaded 10000 training samples
+Loading test data...
+  Loaded 1000 test samples
+
+Training for 10 epochs...
+Learning rate: 0.01, decay: 0.95
+------------------------------------------------------------
+Epoch 1/10: Loss=1.5790, Train=53.1%, Test=79.3%, Time=1.4s
+Epoch 2/10: Loss=0.4843, Train=85.8%, Test=85.9%, Time=1.4s
+Epoch 3/10: Loss=0.3415, Train=90.4%, Test=90.9%, Time=1.4s
+Epoch 4/10: Loss=0.2730, Train=92.1%, Test=89.3%, Time=1.4s
+Epoch 5/10: Loss=0.2296, Train=93.4%, Test=93.9%, Time=1.4s
+Epoch 6/10: Loss=0.2023, Train=94.3%, Test=94.5%, Time=1.4s
+Epoch 7/10: Loss=0.1793, Train=94.9%, Test=92.7%, Time=1.4s
+Epoch 8/10: Loss=0.1632, Train=95.3%, Test=94.9%, Time=1.4s
+Epoch 9/10: Loss=0.1478, Train=95.7%, Test=95.7%, Time=1.4s
+Epoch 10/10: Loss=0.1377, Train=96.0%, Test=94.3%, Time=1.4s
+------------------------------------------------------------
+Training complete in 0.2 minutes
+
+Final Test Accuracy: 94.30%
+
+============================================================
+All 39 experiments completed!
+Results saved to /Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/performance_comp/all_results.txt
+============================================================

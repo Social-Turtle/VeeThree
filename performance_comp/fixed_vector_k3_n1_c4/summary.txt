@@ -1,0 +1,42 @@
+Experiment: fixed_vector (kernel=3, n_pass=1)
+============================================================
+
+CONFIGURATION
+----------------------------------------
+Model type: encoded
+Conv1 kernel size: 3x3
+Encoding: fixed_vector
+N_pass: 1
+Conv2: 16 filters (3x3)
+
+RESULTS
+----------------------------------------
+Final Test Accuracy: 89.20%
+Best Test Accuracy: 89.20%
+Training Time: 10.5s
+
+PER-DIGIT ACCURACY
+----------------------------------------
+  Digit 0: 92.94%
+  Digit 1: 98.41%
+  Digit 2: 87.93%
+  Digit 3: 78.50%
+  Digit 4: 91.82%
+  Digit 5: 87.36%
+  Digit 6: 95.40%
+  Digit 7: 84.85%
+  Digit 8: 87.64%
+  Digit 9: 86.17%
+
+TRAINING HISTORY
+----------------------------------------
+  Epoch 1: Loss=1.9073, Train=40.4%, Test=61.6%
+  Epoch 2: Loss=0.9095, Train=74.5%, Test=77.9%
+  Epoch 3: Loss=0.5904, Train=82.5%, Test=82.9%
+  Epoch 4: Loss=0.4722, Train=85.9%, Test=85.2%
+  Epoch 5: Loss=0.4076, Train=87.7%, Test=84.7%
+  Epoch 6: Loss=0.3676, Train=89.0%, Test=88.0%
+  Epoch 7: Loss=0.3409, Train=89.7%, Test=88.0%
+  Epoch 8: Loss=0.3221, Train=90.1%, Test=88.2%
+  Epoch 9: Loss=0.3065, Train=90.5%, Test=89.0%
+  Epoch 10: Loss=0.2932, Train=91.1%, Test=89.2%

@@ -1,0 +1,7 @@
+# Training Accuracy
+# epoch, value
+1, 0.9716
+2, 0.99
+3, 0.9926
+4, 0.995
+5, 0.9956

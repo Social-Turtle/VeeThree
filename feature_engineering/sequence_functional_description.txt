@@ -1,0 +1,70 @@
+Mathematical Description of an Ordering-Sensitive Computational Primitive
+Part I: Core Definition
+We define a computational primitive with three input terminals and one output terminal, arranged sequentially: [Terminal 1][Terminal 2][Terminal 3]→[Out].
+
+Operational Specification:
+
+Each terminal accepts values in the range [0, ∞)
+Initial state: all terminals hold the value ∞
+Initial output value: ∞
+Activation Rule:
+When input values are strictly increasing across the three terminals (Terminal 1 < Terminal 2 < Terminal 3), the output takes the value of Terminal 3, and all terminals reset to ∞.
+
+Example:
+
+Input state: [0.23][1.71][950.26]→[∞]
+After evaluation: [∞][∞][∞]→[950.26]
+Formal Definition:
+
+N(A,B,C) = { C if A<B<C; ∞ otherwise }
+
+Equivalently: C propagates to output if and only if there exist values A, B such that A<B<C. The output preserves only C; information about the specific values of A and B (beyond their ordering relationship) is discarded.
+
+Part II: Compositional Behavior
+The primitive's utility emerges in networked configurations. Consider two instances:
+
+Instance α with terminals α_a, α_b, α_c
+Instance β with terminals β_a, β_b, β_c
+Composing these where β's output feeds into α's second terminal:
+
+N(α_a, N(β_a, β_b, β_c), α_c) = { α_c if α_a < β_c AND β_a < β_b < β_c < α_c; ∞ otherwise }
+
+Key Property: The β inputs preceding β_c provide no information about their values relative to α_a. We only know they're less than β_c.
+
+Geometric Interpretation:
+
+[Figure 1 description: A 3D plot showing the valid input space - all combinations (Y, Z, X) where Y < Z < X form a pyramidal volume]
+
+The output value precisely specifies X but provides limited precision about Y and Z - effectively selecting a 2D slice from the 3D valid input space.
+
+[Figure 2 description: Given a known output X, the valid input space reduces to a triangular region in the (Y,Z) plane where Y < Z < X]
+
+Observations:
+
+This acts as a dimensionality reduction or selective projection
+The primitive validates ordering relationships across specific dimensions without requiring normalization between them
+In vector interpretation: smaller magnitude values have different computational properties than larger ones (a [1,1,1] configuration behaves differently than [10,10,10])
+Question: Does the largest value dominate the computational significance, or does the relative ordering distribute importance equally across all positions?
+
+Part III: Computational Efficiency Analysis
+Comparison with Conventional Logic:
+
+Suppose we want to detect the occurrence of three distinct features A, B, C in that specific order within a sequence of length N, using traditional AND gates.
+
+Traditional Approach:
+To guarantee detection, we need multiple AND gates with varying fan-in patterns. The first position checks for A (1 input), middle positions check for B (N-2 possible positions), and final position checks for C (1 input).
+
+Computing all possible configurations where dividers separate the fan-in groups:
+
+Total unique AND gates needed: C(N-1, M) = (N-1)(N-M)/M
+
+Total gate count: M(N-1)(N-M) = MN² - NM - NM² + M²
+
+With optimization (exploiting mutual exclusivity of simultaneous values):
+
+C(N-(1+M), M) = (N-(1+M))(N-M)/M
+
+Simplified: N² + M² - 2NM - N + M
+
+Proposed Primitive:
+A single instance can accomplish the same detection, given appropriate value assignment.

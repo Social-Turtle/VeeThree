@@ -1,0 +1,40 @@
+Experiment: Conventional CNN (kernel=3)
+============================================================
+
+CONFIGURATION
+----------------------------------------
+Model type: conventional
+Conv1 kernel size: 3x3
+Conv2: 16 filters (3x3)
+
+RESULTS
+----------------------------------------
+Final Test Accuracy: 93.50%
+Best Test Accuracy: 93.50%
+Training Time: 12.4s
+
+PER-DIGIT ACCURACY
+----------------------------------------
+  Digit 0: 95.29%
+  Digit 1: 99.21%
+  Digit 2: 86.21%
+  Digit 3: 96.26%
+  Digit 4: 95.45%
+  Digit 5: 96.55%
+  Digit 6: 89.66%
+  Digit 7: 87.88%
+  Digit 8: 91.01%
+  Digit 9: 96.81%
+
+TRAINING HISTORY
+----------------------------------------
+  Epoch 1: Loss=2.2535, Train=19.9%, Test=32.0%
+  Epoch 2: Loss=1.2811, Train=66.9%, Test=73.1%
+  Epoch 3: Loss=0.4704, Train=85.9%, Test=85.7%
+  Epoch 4: Loss=0.3475, Train=89.5%, Test=87.8%
+  Epoch 5: Loss=0.2846, Train=91.5%, Test=89.7%
+  Epoch 6: Loss=0.2531, Train=92.8%, Test=89.9%
+  Epoch 7: Loss=0.2266, Train=93.3%, Test=91.0%
+  Epoch 8: Loss=0.2099, Train=93.7%, Test=91.1%
+  Epoch 9: Loss=0.1952, Train=94.1%, Test=93.3%
+  Epoch 10: Loss=0.1857, Train=94.4%, Test=93.5%

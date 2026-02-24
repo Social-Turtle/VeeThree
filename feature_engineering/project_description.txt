@@ -1,0 +1,58 @@
+MNIST Recognition Architecture Using Ordering Primitives
+I need help implementing a character recognition system for MNIST digits using the ordering-sensitive computational primitive previously described. Here's the complete architecture:
+
+Stage 1: Directional Edge Detection
+For each interior pixel (excluding the outermost border), deploy 8 ordering primitives, each examining a different directional relationship:
+
+Vertical-down: [pixel above, center pixel, pixel below]
+Vertical-up: [pixel below, center pixel, pixel above]
+Horizontal-right: [left pixel, center pixel, right pixel]
+Horizontal-left: [right pixel, center pixel, left pixel]
+Diagonal-1-forward: [up-left pixel, center pixel, down-right pixel]
+Diagonal-1-backward: [down-right pixel, center pixel, up-left pixel]
+Diagonal-2-forward: [up-right pixel, center pixel, down-left pixel]
+Diagonal-2-backward: [down-left pixel, center pixel, up-right pixel]
+Value Assignment: The output value from each primitive should be computed as:
+
+value = 255 - (difference between first pixel and last pixel)
+
+where "first" and "last" refer to the ordering within each primitive's three-element sequence.
+
+Important constraint: A primitive only produces output if its three inputs are strictly increasing. Otherwise, output remains ∞.
+
+Stage 2: Directional Winner-Take-All
+For each pixel's 8 primitives: Keep only the primitive with the minimum (fastest) output value. Set all other 7 directions to ∞.
+
+Critical metadata: Track both the direction type (vertical/horizontal/diagonal-1/diagonal-2) and the output value for each surviving signal.
+
+Stage 3: Spatial Pooling with Preserved Geometry
+Apply 2×2 pooling: from each 2×2 grid of pixels, keep only the single signal with minimum value across all pixels and their active directions.
+
+Crucial: Do NOT reduce image dimensions. The output maintains the same 28×28 structure, but approximately 75% of pixels now have no active signals (value = ∞).
+
+Continue tracking direction type and value for surviving signals.
+
+Future Stages: Classification Pipeline
+Additional pooling/suppression stages and final classification logic are still in development. The end goal is to have 10 ordering primitives (one per digit class 0-9), where the primitive producing the minimum output value indicates the recognized digit. The architecture between Stage 3 and final classification is being designed to feed spatially-distributed directional signals into this final layer.
+
+Visualization Requirements
+At each pooling/suppression stage, generate diagnostic images:
+
+Color Encoding:
+Red = vertical direction
+Blue = horizontal direction
+Green = diagonal-1 direction
+Yellow = diagonal-2 direction
+Image Structure:
+For one example digit of each class (0-9), create visualization where:
+
+Each MNIST pixel → 2×2 sub-pixel grid (representing 4 direction types)
+Intensity mapping: Lower values = brighter, higher values = darker, ∞ = full black
+Intensity is globally normalized across all active signals in the current image
+Evolution Across Stages:
+As pooling/suppression eliminates signals:
+
+More sub-pixels and full pixels become black
+Recalculate intensity normalization at each stage using only the surviving signals
+This shows which directional edges remain active and their relative strengths
+Implementation Focus: Please implement Stages 1-3 with the visualization system. Design the code to be extensible for future stages, but don't implement classification yet.

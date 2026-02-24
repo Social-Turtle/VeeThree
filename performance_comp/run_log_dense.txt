@@ -1,0 +1,4 @@
+Usage:
+  --all                        Run all 39 experiments
+  --encoding X --kernel K --n-pass N   Run single encoded experiment
+  --encoding conventional --kernel K    Run single conventional experiment

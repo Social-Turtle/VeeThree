@@ -1,0 +1,21 @@
+Sequential Removal Experiment Results (4 filters)
+============================================================
+
+Encoding        N_Pass   Accuracy  
+-----------------------------------
+binary          1        88.40%
+binary          2        90.20%
+binary          3        88.30%
+binary          4        12.60%
+fixed_rank      1        87.10%
+fixed_rank      2        90.70%
+fixed_rank      3        89.80%
+fixed_rank      4        86.70%
+fixed_vector    1        89.30%
+fixed_vector    2        92.10%
+fixed_vector    3        92.00%
+fixed_vector    4        90.30%
+learned_rank    1        89.80%
+learned_rank    2        90.50%
+learned_rank    3        88.40%
+learned_rank    4        81.80%
