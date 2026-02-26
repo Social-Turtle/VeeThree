@@ -53,8 +53,8 @@ def run_pipeline(image: np.ndarray) -> np.ndarray:
     v2, d2 = winner_take_all(v1, d1)
     v3, _  = spatial_pooling(v2, d2, 2, 2)
 
-    hm, _ = sweep_horizontal(v3, STAGE3_CHANNEL_LABELS, H_DETECTORS, view=2, scan_view=2)
-    vm, _ = sweep_vertical(  v3, STAGE3_CHANNEL_LABELS, V_DETECTORS, view=2, scan_view=2)
+    hm, _ = sweep_horizontal(v3, STAGE3_CHANNEL_LABELS, H_DETECTORS)
+    vm, _ = sweep_vertical(  v3, STAGE3_CHANNEL_LABELS, V_DETECTORS)
     return np.concatenate([hm, vm], axis=2)
 
 
@@ -231,8 +231,8 @@ def main(n_eval) -> None:  # n_eval: False = skip, None = all, int = N/class
     print(f"{'------'}+{'----------'}+{'----------'}+-----")
     for cls in range(10):
         s3 = stage3_values[cls]
-        hm, _ = sweep_horizontal(s3, STAGE3_CHANNEL_LABELS, H_DETECTORS, view=2, scan_view=2)
-        vm, _ = sweep_vertical(  s3, STAGE3_CHANNEL_LABELS, V_DETECTORS, view=2, scan_view=2)
+        hm, _ = sweep_horizontal(s3, STAGE3_CHANNEL_LABELS, H_DETECTORS)
+        vm, _ = sweep_vertical(  s3, STAGE3_CHANNEL_LABELS, V_DETECTORS)
         # hm is (H//2, W, Dh) and vm is (H, W//2, Dv) — pad both to the same spatial size
         Hh, Wh, Dh = hm.shape
         Hv, Wv, Dv = vm.shape

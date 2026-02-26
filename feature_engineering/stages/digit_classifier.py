@@ -1,4 +1,4 @@
-"""Stage 6: Digit classification via recursive presence-based templates.
+"""Stage 6: Digit classification via priority-ordered presence-based rules.
 
 Uses apply_primitive and apply_cassian from primitives/core.py as the
 evaluation primitives.
@@ -34,8 +34,13 @@ Tree building blocks:
                      More primitive rows/cols firing → higher score, which
                      is used to rank digits when multiple templates fire.
 
-Templates are built by composing these classes.  Each digit gets one root
-node; the digit with the highest score wins.
+Classification uses a priority-ordered rule list.  Each rule pairs a
+template (tree of primitives/cassians) with a digit label.  The first
+rule whose template fires (score > 0) wins.  More specific / complex
+rules appear earlier so they are checked before simpler, broader ones.
+This sidesteps the "simplest template always wins" problem: a broad
+pattern can serve as a fallback without stealing matches from the
+specific patterns above it.
 
 STAGE5_CHANNEL_LABELS must match the detector names used in the pipeline
 (H_DETECTORS names followed by V_DETECTORS names).
@@ -196,20 +201,111 @@ class Cassian:
 
 
 # ---------------------------------------------------------------------------
-# Templates  (placeholders — re-derive after inspecting stage-5 output)
+# Priority-ordered rules
 # ---------------------------------------------------------------------------
+# Each rule is (digit, template).  First template that fires wins.
+# Ordered from most specific / rare to most general / common.
+#
+# Primitive firing profile on the 10 reference digits (single example each):
+#
+#       H(h)  H(v)  H(v,h)  H(v,v)  H(h,h)  V(h)  V(v)  V(h,v)  V(v,h)  V(h,h)  V(h,v,h)
+# 0:     5     3      2       3       0       4     6      2       0       1        0
+# 1:     2     0      0       0       0       2     0      0       0       0        0
+# 2:     6     3      0       1       1       4     4      0       1       2        0
+# 3:     9     7      6       3       1       6     8      4       2       3        2
+# 4:     5     4      1       0       0       3     4      1       0       1        0
+# 5:     5     4      1       1       1       6     6      4       0       0        0
+# 6:     7     4      1       3       2       5     8      4       1       4        1
+# 7:     5     2      0       0       0       4     2      1       0       1        0
+# 8:     3     4      0       3       0       3     8      1       1       0        0
+# 9:     6     5      2       1       0       3     6      2       0       1        0
 
+PRIORITY_RULES: list[tuple[int, HPrimitive | VPrimitive | Cassian]] = [
+    # --- Digit 3: uniquely high H(v,h) AND V(h,v,h) ---
+    # Only digit 3 has both of these firing together (score 8).
+    (3, Cassian(
+        HPrimitive("v_line", "h_line"),            # 6 rows — uniquely high
+        VPrimitive("h_line", "v_line", "h_line"),  # 2 cols — only 3 and 6 have this
+        threshold=2,
+    )),
+
+    # --- Digit 6: H(h,h) AND V(h,h) AND V(h,v,h) — all three required ---
+    # After 3 removed, V(h,v,h) fires only for 6 (=1). Combined with
+    # H(h,h) and V(h,h) this is very selective for 6.
+    (6, Cassian(
+        HPrimitive("h_line", "h_line"),            # rows with two h-bars
+        VPrimitive("h_line", "h_line"),            # cols with two h-bars
+        VPrimitive("h_line", "v_line", "h_line"),  # col with h→v→h (6's structure)
+        threshold=3,
+    )),
+
+    # --- Digit 8: H(v,v) AND V(v,h) — two v-sides + v-then-h columns ---
+    # After 3 and 6 removed, only 8 has both H(v,v)≥3 and V(v,h)≥1.
+    (8, Cassian(
+        HPrimitive("v_line", "v_line"),    # two v-sides per row
+        VPrimitive("v_line", "h_line"),    # v then h going down
+        threshold=2,
+    )),
+
+    # --- Digit 0: H(v,v) AND V(h,h) AND V(v) — oval shape ---
+    # 3-child AND: two v-sides + h-bars top/bottom + columns with v.
+    # After 3, 6, 8 removed, fires for 0, 2, 9. Still imperfect —
+    # 0 vs 9 is the hardest pair (see note below).
+    (0, Cassian(
+        HPrimitive("v_line", "v_line"),    # two v-sides
+        VPrimitive("h_line", "h_line"),    # top and bottom h-bars
+        VPrimitive("v_line"),              # columns with v presence
+        threshold=3,
+    )),
+
+    # --- Digit 5: V(h,v) AND H(h,h) — h-then-v columns + two h-bars ---
+    # After 3 and 6 removed, fires mainly for 5.
+    (5, Cassian(
+        VPrimitive("h_line", "v_line"),    # cols with h→v vertically
+        HPrimitive("h_line", "h_line"),    # rows with two h-bars
+        threshold=2,
+    )),
+
+    # --- Digit 2: V(v,v) AND V(h,h) — v_line pairs + two h-bars in columns ---
+    # After 3 and 6 removed, V(v,v) fires only for 2 (=1).
+    # Combined with V(h,h) which 2 also has (=2), this is selective.
+    (2, Cassian(
+        VPrimitive("v_line", "v_line"),    # two v_lines in a column
+        VPrimitive("h_line", "h_line"),    # two h-bars in a column
+        threshold=2,
+    )),
+
+    # --- Digit 4: H(v,h) AND H(v) — v-then-h rows + rows with v ---
+    # 4 has H(v,h)=1 and H(v)=4. Checked before 9 so that 4 is caught
+    # first; 9 falls through to its own broader rule below.
+    (4, Cassian(
+        HPrimitive("v_line", "h_line"),    # at least 1 row with v then h
+        HPrimitive("v_line"),              # rows with v_line
+        threshold=2,
+    )),
+
+    # --- Digit 9: H(v,h) AND V(h,v) — v-then-h in rows + h-then-v in cols ---
+    # After 3, 6, 0, 5, 4 removed. 9 has H(v,h)=2 and V(h,v)=2.
+    (9, Cassian(
+        HPrimitive("v_line", "h_line"),    # v then h in a row
+        VPrimitive("h_line", "v_line"),    # h then v in a column
+        threshold=2,
+    )),
+
+    # --- Digit 7: V(h,v) — at least one column has h then v going down ---
+    # Digit 7 has V(h,v)=1. Digit 1 has V(h,v)=0. This separates them.
+    (7, VPrimitive("h_line", "v_line")),
+
+    # --- Digit 1: fallback ---
+    # 1 is the only digit with zero v_line. All rules above require
+    # v_line in some form, so 1 falls through everything.
+    # We use H("h_line") as a catch-all: fires if any h_line exists.
+    (1, HPrimitive("h_line")),
+]
+
+# Keep DIGIT_TEMPLATES around for backward compatibility / inspection.
 DIGIT_TEMPLATES: dict[int, HPrimitive | VPrimitive | Cassian] = {
-    0: Cassian(HPrimitive("h_line", "h_line"), VPrimitive("v_line", "v_line"), threshold=2),
-    1: VPrimitive("v_line", "v_line", "v_line"),
-    2: Cassian(HPrimitive("h_line"), VPrimitive("v_line"), threshold=2),
-    3: HPrimitive("v_line", "v_line"),
-    4: Cassian(VPrimitive("v_line"), HPrimitive("h_line"), threshold=2),
-    5: Cassian(HPrimitive("h_line"), HPrimitive("h_line"), threshold=2),
-    6: Cassian(HPrimitive("h_line"), VPrimitive("v_line"), threshold=2),
-    7: Cassian(HPrimitive("h_line"), VPrimitive("v_line"), threshold=2),
-    8: VPrimitive("v_line", "v_line"),
-    9: Cassian(HPrimitive("h_line"), VPrimitive("v_line"), threshold=2),
+    digit: template for digit, template in PRIORITY_RULES
 }
 
 
@@ -220,15 +316,18 @@ DIGIT_TEMPLATES: dict[int, HPrimitive | VPrimitive | Cassian] = {
 def classify(
     stage5_map: np.ndarray,
     channel_labels: list[str] | None = None,
-    templates: dict[int, HPrimitive | VPrimitive | Cassian] | None = None,
+    rules: list[tuple[int, HPrimitive | VPrimitive | Cassian]] | None = None,
 ) -> tuple[int, dict[int, int]]:
     """Classify one image from its Stage-5 feature map.
 
+    Uses priority-ordered rules: the first rule whose template fires
+    (score > 0) determines the predicted digit.
+
     Parameters
     ----------
-    stage5_map     : (H, W, D) float64 from Stage 5
+    stage5_map     : (H, W, D) float64 from Stage 4
     channel_labels : length-D list of label strings; defaults to STAGE5_CHANNEL_LABELS
-    templates      : override for DIGIT_TEMPLATES
+    rules          : override for PRIORITY_RULES
 
     Returns
     -------
@@ -237,14 +336,19 @@ def classify(
     """
     if channel_labels is None:
         channel_labels = STAGE5_CHANNEL_LABELS
-    if templates is None:
-        templates = DIGIT_TEMPLATES
+    if rules is None:
+        rules = PRIORITY_RULES
 
-    scores = {
-        digit: node.score(stage5_map, channel_labels)
-        for digit, node in templates.items()
-    }
+    # Compute all scores for reporting.
+    scores: dict[int, int] = {}
+    for digit, template in rules:
+        scores[digit] = template.score(stage5_map, channel_labels)
 
-    firing = {d: s for d, s in scores.items() if s > 0}
-    predicted = max(firing, key=firing.__getitem__) if firing else -1
+    # First rule that fires wins.
+    predicted = -1
+    for digit, _ in rules:
+        if scores[digit] > 0:
+            predicted = digit
+            break
+
     return predicted, scores

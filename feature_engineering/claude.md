@@ -7,10 +7,17 @@ Details: primitives/core.py  |  also has `apply_cassian` (threshold gate on non-
 ## Pipeline Architecture
 - **Stage 1** — Directional edge detection: 8 ordering primitives per interior pixel
 - **Stage 2** — Per-pixel winner-take-all: keep the min-value direction
-- **Stage 3** — Spatial pooling (2×2 min)
-- **Stage 4** — Sweep detection: sliding pattern-matching along rows/cols
-- **Stage 5** — (in progress)
-- **Stage 6** — Classification: one ordering primitive per digit class; winner = predicted digit
+- **Stage 3** — Spatial pooling (2×2 min) → 14×14, channels labeled by direction (h/v/d1/d2)
+- **Stage 4** — Sweep detection: H_DETECTORS pattern ["h","h"] → h_line, V_DETECTORS ["v","v"] → v_line. No spatial compression (view=1, scan_view=1). Output: 14×14×2 with channels ["h_line","v_line"]. Stages 1–3 use value ordering; stage 4+ uses **presence detection** only.
+- **Stage 5** — Removed (was Cassian pooling; Stage 4 output fed directly to classifier)
+- **Stage 6** — Classifier: tree of HPrimitive/VPrimitive/Cassian nodes (digit_classifier.py)
+
+## Classifier Design (Stage 6)
+- `HPrimitive(*pattern)` — scans each row left→right; returns (14,) fire positions or inf
+- `VPrimitive(*pattern)` — scans each col top→bottom; returns (14,) fire positions or inf
+- `Cassian(*children, threshold)` — soft AND gate using apply_cassian from core.py
+- **Template rule**: keep primitive patterns short (1–2 elements). To detect separated struts (e.g. digit 8 = 3 horizontal bars), interleave v_line between h_lines: `VPrimitive("h_line","v_line","h_line","v_line","h_line")`. Without the v_line separators, a single thick stroke also matches.
+- Score = sum of child primitive fires; highest score wins on ties.
 
 ## Code Layout
 ```
