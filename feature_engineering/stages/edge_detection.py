@@ -9,6 +9,7 @@ def edge_detection(image: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
       values:  (28, 28, 8) float64 array — primitive output per direction, np.inf for border/inactive.
       dir_ids: (28, 28, 8) int8 array   — direction ID 0–7 per channel (constant, just np.arange broadcast).
     """
+    num_filters = 4
     values = np.full((28, 28, 8), np.inf, dtype=np.float64)
 
     # Interior pixel slices (rows 1–26, cols 1–26 — the 26×26 non-border region).
@@ -42,39 +43,39 @@ def edge_detection(image: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         image[1:27, 0:26],   # last:   one col to the left
     )
 
-    # Direction 4 — diagonal-1-fwd: first=img[r-1,c-1], center=img[r,c], last=img[r+1,c+1]
-    values[1:27, 1:27, 4] = pixels_to_values(
-        image[0:26, 0:26],   # first:  up-left
-        image[1:27, 1:27],   # center: current
-        image[2:28, 2:28],   # last:   down-right
-    )
+    # # Direction 4 — diagonal-1-fwd: first=img[r-1,c-1], center=img[r,c], last=img[r+1,c+1]
+    # values[1:27, 1:27, 4] = pixels_to_values(
+    #     image[0:26, 0:26],   # first:  up-left
+    #     image[1:27, 1:27],   # center: current
+    #     image[2:28, 2:28],   # last:   down-right
+    # )
 
-    # Direction 5 — diagonal-1-bwd: first=img[r+1,c+1], center=img[r,c], last=img[r-1,c-1]
-    values[1:27, 1:27, 5] = pixels_to_values(
-        image[2:28, 2:28],   # first:  down-right
-        image[1:27, 1:27],   # center: current
-        image[0:26, 0:26],   # last:   up-left
-    )
+    # # Direction 5 — diagonal-1-bwd: first=img[r+1,c+1], center=img[r,c], last=img[r-1,c-1]
+    # values[1:27, 1:27, 5] = pixels_to_values(
+    #     image[2:28, 2:28],   # first:  down-right
+    #     image[1:27, 1:27],   # center: current
+    #     image[0:26, 0:26],   # last:   up-left
+    # )
 
-    # Direction 6 — diagonal-2-fwd: first=img[r-1,c+1], center=img[r,c], last=img[r+1,c-1]
-    values[1:27, 1:27, 6] = pixels_to_values(
-        image[0:26, 2:28],   # first:  up-right
-        image[1:27, 1:27],   # center: current
-        image[2:28, 0:26],   # last:   down-left
-    )
+    # # Direction 6 — diagonal-2-fwd: first=img[r-1,c+1], center=img[r,c], last=img[r+1,c-1]
+    # values[1:27, 1:27, 6] = pixels_to_values(
+    #     image[0:26, 2:28],   # first:  up-right
+    #     image[1:27, 1:27],   # center: current
+    #     image[2:28, 0:26],   # last:   down-left
+    # )
 
-    # Direction 7 — diagonal-2-bwd: first=img[r+1,c-1], center=img[r,c], last=img[r-1,c+1]
-    values[1:27, 1:27, 7] = pixels_to_values(
-        image[2:28, 0:26],   # first:  down-left
-        image[1:27, 1:27],   # center: current
-        image[0:26, 2:28],   # last:   up-right
-    )
+    # # Direction 7 — diagonal-2-bwd: first=img[r+1,c-1], center=img[r,c], last=img[r-1,c+1]
+    # values[1:27, 1:27, 7] = pixels_to_values(
+    #     image[2:28, 0:26],   # first:  down-left
+    #     image[1:27, 1:27],   # center: current
+    #     image[0:26, 2:28],   # last:   up-right
+    # )
 
     # dir_ids: (28, 28, 8) int8 array where dir_ids[:, :, d] == d for all d in 0..7.
     # Construct once via broadcast: shape (8,) -> (1, 1, 8) -> broadcast to (28, 28, 8).
     dir_ids = np.broadcast_to(
-        np.arange(8, dtype=np.int8)[np.newaxis, np.newaxis, :],
-        (28, 28, 8),
+        np.arange(num_filters, dtype=np.int8)[np.newaxis, np.newaxis, :],
+        (28, 28, num_filters),
     ).copy()
 
     return values, dir_ids

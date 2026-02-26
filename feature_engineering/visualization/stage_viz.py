@@ -6,13 +6,13 @@ import os
 def visualize_stage(
     stage_name: str,
     digit_class: int,
-    values: np.ndarray,   # (28, 28, 8) float64
-    dir_ids: np.ndarray,  # (28, 28, 8) int8  (not actually used, dirs are fixed 0-7)
+    values: np.ndarray,   # (H, W, 8) float64
+    dir_ids: np.ndarray,  # (H, W, 8) int8  (not actually used, dirs are fixed 0-7)
     out_dir: str,
 ) -> None:
-    """Saves a 56x56 PNG to out_dir/{stage_name}_digit{digit_class}.png.
+    """Saves a (2H)x(2W) PNG to out_dir/{stage_name}_digit{digit_class}.png.
 
-    Layout of the 2x2 sub-pixel block for each MNIST pixel (r, c):
+    Layout of the 2x2 sub-pixel block for each logical pixel (r, c):
         top-left     (2*r,   2*c  ): vertical   (dirs 0,1) -> RED
         top-right    (2*r,   2*c+1): horizontal (dirs 2,3) -> BLUE
         bottom-left  (2*r+1, 2*c  ): diagonal-1 (dirs 4,5) -> GREEN
@@ -31,12 +31,13 @@ def visualize_stage(
         - np.inf -> intensity 0.0 (black).
     """
     os.makedirs(out_dir, exist_ok=True)
+    H, W = values.shape[:2]
 
     # ------------------------------------------------------------------
-    # Step 1: compute per-direction-type active values, shape (28, 28)
+    # Step 1: compute per-direction-type active values, shape (H, W)
     # ------------------------------------------------------------------
     # Replace inf with nan so np.nanmin ignores them cleanly.
-    v = values.astype(np.float64)  # (28, 28, 8)
+    v = values.astype(np.float64)  # (H, W, 8)
 
     def _nanmin_pair(ch_a: int, ch_b: int) -> np.ndarray:
         """Return np.nanmin of two channels; result is np.inf where both are inf."""
@@ -92,12 +93,12 @@ def visualize_stage(
     int_diagonal2  = _to_intensity(v_diagonal2)
 
     # ------------------------------------------------------------------
-    # Step 3: build the (56, 56, 3) uint8 image
+    # Step 3: build the (2H, 2W, 3) uint8 image
     # ------------------------------------------------------------------
-    img = np.zeros((56, 56, 3), dtype=np.uint8)
+    img = np.zeros((2 * H, 2 * W, 3), dtype=np.uint8)
 
-    for r in range(28):
-        for c in range(28):
+    for r in range(H):
+        for c in range(W):
             # top-left: vertical -> RED channel
             iv = int_vertical[r, c]
             img[2 * r,     2 * c    ] = (round(255 * iv), 0, 0)

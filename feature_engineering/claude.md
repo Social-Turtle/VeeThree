@@ -1,52 +1,32 @@
-Hello friend! Here's what we're working on:
+# MNIST Recognition via Ordering Primitives
 
-Ordering-Sensitive Computational Primitives for MNIST
-
-Quick Reference
-Core Primitive:
-
+## Core Primitive
 N(A, B, C) = { C if A < B < C; ∞ otherwise }
-Full Details: ./sequence_functional_description.txt
+Details: primitives/core.py  |  also has `apply_cassian` (threshold gate on non-∞ count)
 
-Current Task: Implement MNIST Recognition Pipeline (Stages 1-3)
-(Full details @ ./project_description.txt) - check out this file with a Haiku subagent. Don't fill your own context unless necessary.
+## Pipeline Architecture
+- **Stage 1** — Directional edge detection: 8 ordering primitives per interior pixel
+- **Stage 2** — Per-pixel winner-take-all: keep the min-value direction
+- **Stage 3** — Spatial pooling (2×2 min)
+- **Stage 4** — Sweep detection: sliding pattern-matching along rows/cols
+- **Stage 5** — (in progress)
+- **Stage 6** — Classification: one ordering primitive per digit class; winner = predicted digit
 
-Architecture Summary
-Stage 1: 8 directional ordering primitives per interior pixel (26×26)
-
-Output: 255 - |first - last| when strictly increasing, else ∞
-Track: direction type + value
-Stage 2: Per-pixel winner-take-all (keep min across 8 directions)
-
-Stage 3: 2×2 spatial pooling (keep min, maintain 28×28 geometry)
-
-Visualization Requirements
-Color Encoding: Red=vertical, Blue=horizontal, Green=diagonal-1, Yellow=diagonal-2
-
-Format: Each pixel → 2×2 sub-grid (4 direction types), intensity normalized per stage (lower=brighter, ∞=black)
-
-Output: Show 1 example per digit class (0-9) at each stage
-
-Code Organization
+## Code Layout
+```
 feature_engineering/
-├── primitives/          # Core N(A,B,C) implementation
-├── stages/              # edge_detection, winner_take_all, spatial_pooling
-├── visualization/       # Stage diagnostic images
-└── experiments/         # mnist_pipeline.py
-Implementation Priorities
-Modularity: Each stage accepts/returns (values, metadata) tuples
-Extensibility: Design for future stages beyond Stage 3
-Vectorization: Use NumPy/PyTorch for efficiency
-∞ Handling: Use np.inf or masked arrays
-Key Design Decisions to Validate
-Value assignment formula: 255 - |difference|
-Pooling strategy: 2×2 minimum
-Metadata preservation through pipeline
-Global vs. local normalization in visualization
-Communication Preferences
-Mathematical rigor expected (CS/EE background)
-Prioritize clarity over optimization
-Heavy visualization for pipeline understanding
-Iterative experimental refinement
+├── primitives/      # core.py — apply_primitive, apply_cassian, apply_or, apply_and
+├── stages/          # one file per stage
+├── visualization/   # diagnostic image renderers
+└── experiments/     # mnist_pipeline.py  ← main entrypoint
+```
 
-Do not venture outside of /feature_engineering/ !
+## Working Conventions
+- Stages pass `(values: ndarray, metadata)` tuples
+- ∞ = inactive; use np.inf throughout
+- Visualize one example per digit class (0–9) at each stage
+- Stay inside /feature_engineering/
+- when running code, always use: uv run
+- Write very clear code. Prioritize clarity over efficiency.
+- Before reading more than 2 files, stop and ask a clarifying question.
+- Talk to me early and often. I'd rather you give me a good question then spend time trying to sort it out yourself.
