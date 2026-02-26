@@ -16,7 +16,8 @@ def edge_detection(image: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     # For each direction, define (first, center, last) as 26×26 vectorized slices.
 
     # Direction 0 — vertical-down: first=img[r-1,c], center=img[r,c], last=img[r+1,c]
-    values[1:27, 1:27, 0] = pixels_to_values(
+    # Shifted 1px up: fires at bottom edge of strokes, stored 1 row higher toward stroke center.
+    values[0:26, 1:27, 0] = pixels_to_values(
         image[0:26, 1:27],   # first:  one row above
         image[1:27, 1:27],   # center: current row
         image[2:28, 1:27],   # last:   one row below
@@ -30,7 +31,8 @@ def edge_detection(image: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     # )
 
     # Direction 2 — horizontal-right: first=img[r,c-1], center=img[r,c], last=img[r,c+1]
-    values[1:27, 1:27, 2] = pixels_to_values(
+    # Shifted 1px left: fires at right edge of strokes, stored 1 col left toward stroke center.
+    values[1:27, 0:26, 2] = pixels_to_values(
         image[1:27, 0:26],   # first:  one col to the left
         image[1:27, 1:27],   # center: current col
         image[1:27, 2:28],   # last:   one col to the right
