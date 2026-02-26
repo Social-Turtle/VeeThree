@@ -1,88 +1,250 @@
-"""Stage 6: Digit classification using per-digit Cassian AND gates.
+"""Stage 6: Digit classification via recursive presence-based templates.
 
-Each digit is characterized by a template — a list of (row, col, channel)
-positions that must ALL be active in the Stage-5 combined map for that digit
-to fire.  The digit whose Cassian output value is highest among those that
-fire is the predicted class ("highest lowest value" selection rule).
+Uses apply_primitive and apply_cassian from primitives/core.py as the
+evaluation primitives.
 
-Combined map channels (passed from pipeline):
-  ch 0 = h_pool ch 0  (h_line detector, horizontal Cassian)
-  ch 1 = h_pool ch 1  (v_line detector, horizontal Cassian)
-  ch 2 = v_pool ch 0  (h_line detector, vertical Cassian)
-  ch 3 = v_pool ch 1  (v_line detector, vertical Cassian)
+Tree building blocks:
 
-Templates were derived by inspecting actual Stage-5 firing positions for
-each digit class and selecting pairs that are unique to that class.
+    HPrimitive(*pattern)
+        Scans each row of the stage-5 map left→right.  For each row, the
+        state machine advances when it finds a pixel whose channel label
+        matches the current pattern element.  When all slots fill, the
+        collected x-positions are fed into apply_primitive, which checks
+        they are strictly increasing — always true for a left→right scan,
+        so the primitive fires whenever the full pattern completes.
+        Fire value = x-position of the last matched pixel.
+
+        evaluate() → (H,) float64: fire x-position per row, or inf if the
+                     pattern never completed for that row.
+        score()    → int: number of rows that fired (count of finite values).
+
+    VPrimitive(*pattern)
+        Same as HPrimitive but scans each column top→bottom.
+        evaluate() → (W,) float64: fire y-position per column, or inf.
+        score()    → int: number of columns that fired.
+
+    Cassian(*children, threshold)
+        Soft AND gate.  Reduces each child's output to a single "fired"
+        scalar: the last finite value in the child's output array, or inf
+        if none.  Then calls apply_cassian on those scalars with the given
+        threshold, which fires if at least `threshold` scalars are finite.
+
+        evaluate() → float64 scalar: non-inf if ≥ threshold children fired.
+        score()    → int: sum of child scores if this node fires, else 0.
+                     More primitive rows/cols firing → higher score, which
+                     is used to rank digits when multiple templates fire.
+
+Templates are built by composing these classes.  Each digit gets one root
+node; the digit with the highest score wins.
+
+STAGE5_CHANNEL_LABELS must match the detector names used in the pipeline
+(H_DETECTORS names followed by V_DETECTORS names).
 """
 from __future__ import annotations
 
 import numpy as np
 
-# ── Templates derived from Stage-5 firing analysis ───────────────────────────
-DIGIT_TEMPLATES: dict[int, list[tuple[int, int, int]]] = {
-    # h_line Cassian fires at col 9, rows 5-6 (right side of oval)
-    0: [(5,  9, 0), (6,  9, 0)],
-    # v_pool h_line Cassian fires at col 7, rows 5-6 (vertical stroke)
-    1: [(5,  7, 2), (6,  7, 2)],
-    # v_line Cassian fires at row 10, cols 9-10 (bottom horizontal bar)
-    2: [(10, 9, 1), (10, 10, 1)],
-    # v_line Cassian fires at row 7, cols 7-8 (right bumps)
-    3: [(7,  7, 1), (7,  8, 1)],
-    # single h_pool v_line fire + v_pool top-right vertical stroke
-    4: [(9,  4, 1), (2, 10, 2)],
-    # v_line Cassian fires at row 3, cols 9-10 (top-right arc)
-    5: [(3,  9, 1), (3, 10, 1)],
-    # h_line Cassian fires at col 4, rows 7-8 (lower-left vertical)
-    6: [(7,  4, 0), (8,  4, 0)],
-    # v_line Cassian fires at row 4, cols 2-3 (top horizontal bar)
-    7: [(4,  2, 1), (4,  3, 1)],
-    # v_line Cassian fires at row 10, cols 1-2 (bottom-left of lower loop)
-    8: [(10, 1, 1), (10, 2, 1)],
-    # v_pool h_line Cassians: left stem + right curve
-    9: [(4,  5, 2), (5,  8, 2)],
-}
+from primitives.core import apply_primitive, apply_cassian as _apply_cassian
 
 
-def _collect(stage5_map: np.ndarray, template: list[tuple[int, int, int]]) -> np.ndarray:
-    """Extract values at template positions; out-of-bounds → np.inf."""
-    H, W, D = stage5_map.shape
-    vals = []
-    for row, col, ch in template:
-        if 0 <= row < H and 0 <= col < W and 0 <= ch < D:
-            vals.append(float(stage5_map[row, col, ch]))
-        else:
-            vals.append(np.inf)
-    return np.array(vals, dtype=np.float64)
+# Channel labels for the combined Stage-5 map fed into classify().
+# Order must match: [h_pool channels..., v_pool channels...]
+# These are the .name fields of H_DETECTORS + V_DETECTORS in mnist_pipeline.py.
+STAGE5_CHANNEL_LABELS: list[str] = ["h_line", "v_line"]
 
 
-def classify(
+# ---------------------------------------------------------------------------
+# Internal helper
+# ---------------------------------------------------------------------------
+
+def _is_present(
     stage5_map: np.ndarray,
-    templates: dict[int, list[tuple[int, int, int]]] | None = None,
-) -> tuple[int, dict[int, float]]:
-    """Classify one image from its Stage-5 feature map.
+    channel_labels: list[str],
+    row: int,
+    col: int,
+    label: str,
+) -> bool:
+    """Return True if (row, col) has any finite value in a channel named `label`."""
+    for ch_idx, ch_label in enumerate(channel_labels):
+        if ch_label == label and np.isfinite(stage5_map[row, col, ch_idx]):
+            return True
+    return False
 
-    For each digit template, applies a Cassian AND gate (all K positions must
-    be active).  The digit whose Cassian output value is highest (finite) wins.
+
+# ---------------------------------------------------------------------------
+# Building blocks
+# ---------------------------------------------------------------------------
+
+class HPrimitive:
+    """Horizontal sequence detector: scans each row left→right.
+
+    For each row, the state machine looks for the pattern elements in order.
+    Each matched pixel contributes its x-coordinate to the position buffer.
+    When all slots fill, apply_primitive checks strict increase (guaranteed
+    left→right), and the fire value (last x-position) is recorded for that row.
 
     Parameters
     ----------
-    stage5_map : (H, W, D) float64 from Stage 5
-    templates  : override for DIGIT_TEMPLATES
+    *pattern : channel labels to match in order, e.g. "h_line", "v_line"
+    """
+
+    def __init__(self, *pattern: str):
+        self.pattern = pattern
+
+    def evaluate(self, stage5_map: np.ndarray, channel_labels: list[str]) -> np.ndarray:
+        """Return (H,) array: fire x-position per row, or inf if pattern did not complete."""
+        H, W, _ = stage5_map.shape
+        P = len(self.pattern)
+        results = np.full(H, np.inf)
+        for row in range(H):
+            state = 0
+            pos_buffer = np.full(P, np.inf)
+            for col in range(W):
+                if _is_present(stage5_map, channel_labels, row, col, self.pattern[state]):
+                    pos_buffer[state] = float(col)
+                    state += 1
+                    if state == P:
+                        # Positions are always increasing left→right, so this always fires.
+                        fire_val = apply_primitive(pos_buffer.reshape(1, -1))[0]
+                        results[row] = fire_val
+                        pos_buffer = np.full(P, np.inf)
+                        state = 0
+        return results
+
+    def score(self, stage5_map: np.ndarray, channel_labels: list[str]) -> int:
+        """Return count of rows where the pattern completed."""
+        return int(np.sum(np.isfinite(self.evaluate(stage5_map, channel_labels))))
+
+
+class VPrimitive:
+    """Vertical sequence detector: scans each column top→bottom.
+
+    Mirror of HPrimitive along the column axis.  Fire value = y-position
+    of the last matched pixel in that column.
+
+    Parameters
+    ----------
+    *pattern : channel labels to match in order, e.g. "v_line", "h_line"
+    """
+
+    def __init__(self, *pattern: str):
+        self.pattern = pattern
+
+    def evaluate(self, stage5_map: np.ndarray, channel_labels: list[str]) -> np.ndarray:
+        """Return (W,) array: fire y-position per column, or inf if pattern did not complete."""
+        H, W, _ = stage5_map.shape
+        P = len(self.pattern)
+        results = np.full(W, np.inf)
+        for col in range(W):
+            state = 0
+            pos_buffer = np.full(P, np.inf)
+            for row in range(H):
+                if _is_present(stage5_map, channel_labels, row, col, self.pattern[state]):
+                    pos_buffer[state] = float(row)
+                    state += 1
+                    if state == P:
+                        fire_val = apply_primitive(pos_buffer.reshape(1, -1))[0]
+                        results[col] = fire_val
+                        pos_buffer = np.full(P, np.inf)
+                        state = 0
+        return results
+
+    def score(self, stage5_map: np.ndarray, channel_labels: list[str]) -> int:
+        """Return count of columns where the pattern completed."""
+        return int(np.sum(np.isfinite(self.evaluate(stage5_map, channel_labels))))
+
+
+class Cassian:
+    """Soft AND gate: fires if at least `threshold` children fired.
+
+    Each child's output (an array or scalar) is first reduced to a single
+    scalar — the last finite value if any exist, else inf.  apply_cassian
+    then counts how many of those scalars are finite, and fires only if
+    the count meets the threshold.
+
+    score() returns the sum of all children's scores when this node fires,
+    giving a richer signal than just "fired/not fired" for digit ranking.
+
+    Parameters
+    ----------
+    *children : HPrimitive, VPrimitive, or Cassian nodes
+    threshold : minimum number of children that must fire
+    """
+
+    def __init__(self, *children: HPrimitive | VPrimitive | Cassian, threshold: int):
+        self.children = children
+        self.threshold = threshold
+
+    def _reduce_to_scalar(self, child_output) -> float:
+        """Collapse a child's array to one scalar: last finite value, or inf."""
+        arr = np.atleast_1d(np.asarray(child_output, dtype=float))
+        finite_vals = arr[np.isfinite(arr)]
+        return float(finite_vals[-1]) if len(finite_vals) > 0 else np.inf
+
+    def evaluate(self, stage5_map: np.ndarray, channel_labels: list[str]) -> float:
+        """Return a scalar: non-inf if ≥ threshold children fired, else inf."""
+        child_outputs = [c.evaluate(stage5_map, channel_labels) for c in self.children]
+        scalars = np.array([self._reduce_to_scalar(o) for o in child_outputs])
+        result = _apply_cassian(scalars.reshape(1, -1), self.threshold)
+        return float(result.squeeze())
+
+    def score(self, stage5_map: np.ndarray, channel_labels: list[str]) -> int:
+        """Sum of child scores when this node fires, else 0."""
+        if np.isfinite(self.evaluate(stage5_map, channel_labels)):
+            return sum(c.score(stage5_map, channel_labels) for c in self.children)
+        return 0
+
+
+# ---------------------------------------------------------------------------
+# Templates  (placeholders — re-derive after inspecting stage-5 output)
+# ---------------------------------------------------------------------------
+
+DIGIT_TEMPLATES: dict[int, HPrimitive | VPrimitive | Cassian] = {
+    0: Cassian(HPrimitive("h_line", "h_line"), VPrimitive("v_line", "v_line"), threshold=2),
+    1: VPrimitive("v_line", "v_line", "v_line"),
+    2: Cassian(HPrimitive("h_line"), VPrimitive("v_line"), threshold=2),
+    3: HPrimitive("v_line", "v_line"),
+    4: Cassian(VPrimitive("v_line"), HPrimitive("h_line"), threshold=2),
+    5: Cassian(HPrimitive("h_line"), HPrimitive("h_line"), threshold=2),
+    6: Cassian(HPrimitive("h_line"), VPrimitive("v_line"), threshold=2),
+    7: Cassian(HPrimitive("h_line"), VPrimitive("v_line"), threshold=2),
+    8: VPrimitive("v_line", "v_line"),
+    9: Cassian(HPrimitive("h_line"), VPrimitive("v_line"), threshold=2),
+}
+
+
+# ---------------------------------------------------------------------------
+# Classifier
+# ---------------------------------------------------------------------------
+
+def classify(
+    stage5_map: np.ndarray,
+    channel_labels: list[str] | None = None,
+    templates: dict[int, HPrimitive | VPrimitive | Cassian] | None = None,
+) -> tuple[int, dict[int, int]]:
+    """Classify one image from its Stage-5 feature map.
+
+    Parameters
+    ----------
+    stage5_map     : (H, W, D) float64 from Stage 5
+    channel_labels : length-D list of label strings; defaults to STAGE5_CHANNEL_LABELS
+    templates      : override for DIGIT_TEMPLATES
 
     Returns
     -------
-    predicted : int 0–9, or -1 if no digit fires
-    scores    : dict digit → Cassian output value (np.inf = did not fire)
+    predicted : int 0–9, or -1 if no template fires
+    scores    : dict digit → score (0 = did not fire)
     """
+    if channel_labels is None:
+        channel_labels = STAGE5_CHANNEL_LABELS
     if templates is None:
         templates = DIGIT_TEMPLATES
 
-    scores: dict[int, float] = {}
-    for digit, template in templates.items():
-        vals = _collect(stage5_map, template)
-        # Cassian AND: all K must be finite; output = last value
-        scores[digit] = float(vals[-1]) if np.all(np.isfinite(vals)) else np.inf
+    scores = {
+        digit: node.score(stage5_map, channel_labels)
+        for digit, node in templates.items()
+    }
 
-    finite = {d: s for d, s in scores.items() if np.isfinite(s)}
-    predicted = max(finite, key=finite.__getitem__) if finite else -1
+    firing = {d: s for d, s in scores.items() if s > 0}
+    predicted = max(firing, key=firing.__getitem__) if firing else -1
     return predicted, scores

@@ -22,7 +22,6 @@ from stages.sweep_detection import (
     tighten_columns, tighten_rows,
     STAGE3_CHANNEL_LABELS,
 )
-from stages.cassian_pooling import cassian_pool_horizontal, cassian_pool_vertical
 from stages.digit_classifier import classify, DIGIT_TEMPLATES
 from visualization.stage_viz import visualize_all_digits
 from visualization.sweep_viz import visualize_sweep
@@ -41,14 +40,14 @@ V_DETECTORS = [
 
 
 # ------------------------------------------------------------------ #
-# Single-image pipeline (stages 1-5, no visualization)
+# Single-image pipeline (stages 1-4, no visualization)
 # ------------------------------------------------------------------ #
 def run_pipeline(image: np.ndarray) -> np.ndarray:
-    """Run stages 1-5 on one (28, 28) float64 image.
+    """Run stages 1-4 on one (28, 28) float64 image.
 
-    Returns the combined Stage-5 map: (H, W, 4) float64
-      ch 0-1 = h_pool (horizontal Cassians on h_line / v_line)
-      ch 2-3 = v_pool (vertical  Cassians on h_line / v_line)
+    Returns the combined Stage-4 map: (H, W, 2) float64
+      ch 0 = h_line sweep output
+      ch 1 = v_line sweep output
     """
     v1, d1 = edge_detection(image)
     v2, d2 = winner_take_all(v1, d1)
@@ -56,19 +55,7 @@ def run_pipeline(image: np.ndarray) -> np.ndarray:
 
     hm, _ = sweep_horizontal(v3, STAGE3_CHANNEL_LABELS, H_DETECTORS, view=2, scan_view=2)
     vm, _ = sweep_vertical(  v3, STAGE3_CHANNEL_LABELS, V_DETECTORS, view=2, scan_view=2)
-    combined4 = np.concatenate([hm, vm], axis=2)
-
-    h_pool, _ = cassian_pool_horizontal(combined4, width=3, threshold=2)
-    v_pool, _ = cassian_pool_vertical(  combined4, width=3, threshold=2)
-
-    Hh, Wh, Dh = h_pool.shape
-    Hv, Wv, Dv = v_pool.shape
-    H_max, W_max = max(Hh, Hv), max(Wh, Wv)
-    h_pad = np.full((H_max, W_max, Dh), np.inf)
-    h_pad[:Hh, :Wh, :] = h_pool
-    v_pad = np.full((H_max, W_max, Dv), np.inf)
-    v_pad[:Hv, :Wv, :] = v_pool
-    return np.concatenate([h_pad, v_pad], axis=2)
+    return np.concatenate([hm, vm], axis=2)
 
 
 # ------------------------------------------------------------------ #
@@ -259,52 +246,19 @@ def main(n_eval) -> None:  # n_eval: False = skip, None = all, int = N/class
     print(f"Stage 4 visualizations saved to {out_dir4}/")
 
     # ------------------------------------------------------------------ #
-    # Stage 5 — Cassian Pooling
+    # Stage 5 — Digit Classification (visualization batch)
     # ------------------------------------------------------------------ #
-    out_dir5 = os.path.join(out_base, "stage5")
-    os.makedirs(out_dir5, exist_ok=True)
-    stage5_maps = []
-
-    print("\nStage 5 — Cassian Pooling (width=3, threshold=2, H + V)")
-    print(f"{'Digit':<6}| {'H fires':<10}| {'V fires':<10}| {'H shape':<10}| V shape")
-    print(f"{'------'}+{'----------'}+{'----------'}+{'----------'}+--------")
-    for cls in range(10):
-        h_pool, _ = cassian_pool_horizontal(stage4_maps[cls], width=3, threshold=2)
-        v_pool, _ = cassian_pool_vertical(  stage4_maps[cls], width=3, threshold=2)
-        Hh, Wh, Dh = h_pool.shape
-        Hv, Wv, Dv = v_pool.shape
-        print(f"{cls:<6}| {int(np.isfinite(h_pool).sum()):<10}| {int(np.isfinite(v_pool).sum()):<10}| {Hh}×{Wh}{'':4}| {Hv}×{Wv}")
-
-        H_max, W_max = max(Hh, Hv), max(Wh, Wv)
-        h_pad = np.full((H_max, W_max, Dh), np.inf); h_pad[:Hh, :Wh, :] = h_pool
-        v_pad = np.full((H_max, W_max, Dv), np.inf); v_pad[:Hv, :Wv, :] = v_pool
-        combined5 = np.concatenate([h_pad, v_pad], axis=2)
-        colors5 = [(0, 0, 255)] * Dh + [(255, 0, 0)] * Dv
-        visualize_sweep(combined5, colors5).save(os.path.join(out_dir5, f"stage5_digit{cls}.png"))
-        stage5_maps.append((h_pool, v_pool))
-    print(f"Stage 5 visualizations saved to {out_dir5}/")
-
-    # ------------------------------------------------------------------ #
-    # Stage 6 — Digit Classification (visualization batch)
-    # ------------------------------------------------------------------ #
-    print("\nStage 6 — Digit Classification (visualization batch)")
+    print("\nStage 5 — Digit Classification (visualization batch)")
     print(f"{'True':<6}| {'Pred':<6}| {'Correct?':<10}| Score")
     print(f"{'------'}+{'------'}+{'----------'}+------")
     correct = 0
     for cls in range(10):
-        h_pool, v_pool = stage5_maps[cls]
-        Hh, Wh, Dh = h_pool.shape; Hv, Wv, Dv = v_pool.shape
-        H_max, W_max = max(Hh, Hv), max(Wh, Wv)
-        h_pad = np.full((H_max, W_max, Dh), np.inf); h_pad[:Hh, :Wh, :] = h_pool
-        v_pad = np.full((H_max, W_max, Dv), np.inf); v_pad[:Hv, :Wv, :] = v_pool
-        combined6 = np.concatenate([h_pad, v_pad], axis=2)
-
-        predicted, scores = classify(combined6)
+        predicted, scores = classify(stage4_maps[cls])
         ok = predicted == cls
         if ok:
             correct += 1
-        score = scores.get(predicted, np.inf)
-        score_str = f"{score:.1f}" if np.isfinite(score) else "inf"
+        score = scores.get(predicted, 0)
+        score_str = str(score) if score > 0 else "none"
         print(f"{cls:<6}| {predicted:<6}| {'YES' if ok else 'no':<10}| {score_str}")
     print(f"\nViz-batch accuracy: {correct}/10")
 
