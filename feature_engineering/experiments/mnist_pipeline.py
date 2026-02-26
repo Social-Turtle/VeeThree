@@ -54,8 +54,8 @@ def run_pipeline(image: np.ndarray) -> np.ndarray:
     v2, d2 = winner_take_all(v1, d1)
     v3, _  = spatial_pooling(v2, d2, 2, 2)
 
-    hm, _ = sweep_horizontal(v3, STAGE3_CHANNEL_LABELS, H_DETECTORS)
-    vm, _ = sweep_vertical(  v3, STAGE3_CHANNEL_LABELS, V_DETECTORS)
+    hm, _ = sweep_horizontal(v3, STAGE3_CHANNEL_LABELS, H_DETECTORS, view=2, scan_view=2)
+    vm, _ = sweep_vertical(  v3, STAGE3_CHANNEL_LABELS, V_DETECTORS, view=2, scan_view=2)
     combined4 = np.concatenate([hm, vm], axis=2)
 
     h_pool, _ = cassian_pool_horizontal(combined4, width=3, threshold=2)
@@ -244,9 +244,15 @@ def main(n_eval) -> None:  # n_eval: False = skip, None = all, int = N/class
     print(f"{'------'}+{'----------'}+{'----------'}+-----")
     for cls in range(10):
         s3 = stage3_values[cls]
-        hm, _ = sweep_horizontal(s3, STAGE3_CHANNEL_LABELS, H_DETECTORS)
-        vm, _ = sweep_vertical(  s3, STAGE3_CHANNEL_LABELS, V_DETECTORS)
-        combined = np.concatenate([hm, vm], axis=2)
+        hm, _ = sweep_horizontal(s3, STAGE3_CHANNEL_LABELS, H_DETECTORS, view=2, scan_view=2)
+        vm, _ = sweep_vertical(  s3, STAGE3_CHANNEL_LABELS, V_DETECTORS, view=2, scan_view=2)
+        # hm is (H//2, W, Dh) and vm is (H, W//2, Dv) — pad both to the same spatial size
+        Hh, Wh, Dh = hm.shape
+        Hv, Wv, Dv = vm.shape
+        H_max, W_max = max(Hh, Hv), max(Wh, Wv)
+        hm_pad = np.full((H_max, W_max, Dh), np.inf); hm_pad[:Hh, :Wh, :] = hm
+        vm_pad = np.full((H_max, W_max, Dv), np.inf); vm_pad[:Hv, :Wv, :] = vm
+        combined = np.concatenate([hm_pad, vm_pad], axis=2)
         stage4_maps.append(combined)
         print(f"{cls:<6}| {int(np.isfinite(hm).sum()):<10}| {int(np.isfinite(vm).sum()):<10}| {combined.shape[0]}×{combined.shape[1]}")
         visualize_sweep(combined, all_colors).save(os.path.join(out_dir4, f"stage4_digit{cls}.png"))

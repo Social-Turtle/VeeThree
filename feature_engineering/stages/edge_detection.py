@@ -22,12 +22,12 @@ def edge_detection(image: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         image[2:28, 1:27],   # last:   one row below
     )
 
-    # Direction 1 — vertical-up: first=img[r+1,c], center=img[r,c], last=img[r-1,c]
-    values[1:27, 1:27, 1] = pixels_to_values(
-        image[2:28, 1:27],   # first:  one row below
-        image[1:27, 1:27],   # center: current row
-        image[0:26, 1:27],   # last:   one row above
-    )
+    # # Direction 1 — vertical-up: first=img[r+1,c], center=img[r,c], last=img[r-1,c]
+    # values[1:27, 1:27, 1] = pixels_to_values(
+    #     image[2:28, 1:27],   # first:  one row below
+    #     image[1:27, 1:27],   # center: current row
+    #     image[0:26, 1:27],   # last:   one row above
+    # )
 
     # Direction 2 — horizontal-right: first=img[r,c-1], center=img[r,c], last=img[r,c+1]
     values[1:27, 1:27, 2] = pixels_to_values(
@@ -36,12 +36,12 @@ def edge_detection(image: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         image[1:27, 2:28],   # last:   one col to the right
     )
 
-    # Direction 3 — horizontal-left: first=img[r,c+1], center=img[r,c], last=img[r,c-1]
-    values[1:27, 1:27, 3] = pixels_to_values(
-        image[1:27, 2:28],   # first:  one col to the right
-        image[1:27, 1:27],   # center: current col
-        image[1:27, 0:26],   # last:   one col to the left
-    )
+    # # Direction 3 — horizontal-left: first=img[r,c+1], center=img[r,c], last=img[r,c-1]
+    # values[1:27, 1:27, 3] = pixels_to_values(
+    #     image[1:27, 2:28],   # first:  one col to the right
+    #     image[1:27, 1:27],   # center: current col
+    #     image[1:27, 0:26],   # last:   one col to the left
+    # )
 
     # # Direction 4 — diagonal-1-fwd: first=img[r-1,c-1], center=img[r,c], last=img[r+1,c+1]
     # values[1:27, 1:27, 4] = pixels_to_values(
