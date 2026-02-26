@@ -118,10 +118,16 @@ def evaluate(n_per_class: int | None) -> None:
     per_class_total   = {c: 0 for c in range(10)}
     no_fire = 0
 
+    # confusion[true_label][predicted] = count
+    confusion: dict[int, dict[int, int]] = {
+        c: {p: 0 for p in range(-1, 10)} for c in range(10)
+    }
+
     for i, (image, label) in enumerate(samples):
         combined6 = run_pipeline(image)
         predicted, _ = classify(combined6)
         per_class_total[label] += 1
+        confusion[label][predicted] += 1
         if predicted == label:
             per_class_correct[label] += 1
         if predicted == -1:
@@ -142,6 +148,53 @@ def evaluate(n_per_class: int | None) -> None:
     print(f"\nOverall: {correct}/{total} = {correct / total * 100:.1f}%")
     if no_fire:
         print(f"No-fire (predicted -1): {no_fire}/{total} = {no_fire/total*100:.1f}%")
+
+    # Save per-digit prediction distribution bar charts.
+    _save_confusion_bars(confusion, per_class_total)
+
+
+def _save_confusion_bars(
+    confusion: dict[int, dict[int, int]],
+    per_class_total: dict[int, int],
+) -> None:
+    """Save a bar chart per true digit showing prediction distribution."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    out_dir = os.path.join(script_dir, "output", "confusion")
+    os.makedirs(out_dir, exist_ok=True)
+
+    pred_labels = list(range(10)) + [-1]
+    x_labels = [str(d) for d in range(10)] + ["none"]
+
+    for true_digit in range(10):
+        counts = [confusion[true_digit][p] for p in pred_labels]
+        total = per_class_total[true_digit]
+
+        fig, ax = plt.subplots(figsize=(8, 4))
+        colors = ["green" if pred_labels[i] == true_digit else "steelblue"
+                  for i in range(len(pred_labels))]
+        bars = ax.bar(x_labels, counts, color=colors)
+
+        # Label each bar with its count.
+        for bar, count in zip(bars, counts):
+            if count > 0:
+                ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5,
+                        str(count), ha="center", va="bottom", fontsize=9)
+
+        ax.set_xlabel("Predicted digit")
+        ax.set_ylabel("Count")
+        acc = counts[true_digit] / total * 100 if total else 0
+        ax.set_title(f"True digit {true_digit}  (n={total}, acc={acc:.1f}%)")
+        ax.set_ylim(0, max(counts) * 1.15 if max(counts) > 0 else 1)
+
+        path = os.path.join(out_dir, f"digit{true_digit}.png")
+        fig.savefig(path, dpi=100, bbox_inches="tight")
+        plt.close(fig)
+
+    print(f"\nPrediction distribution charts saved to {out_dir}/")
 
 
 # ------------------------------------------------------------------ #
@@ -194,29 +247,29 @@ def main(n_eval) -> None:  # n_eval: False = skip, None = all, int = N/class
     visualize_all_digits("stage1", stage1_values, stage1_dir_ids, out_dir1)
     print(f"Stage 1 visualizations saved to {out_dir1}/")
 
-    # ------------------------------------------------------------------ #
-    # Stage 2 — Winner-Take-All
-    # ------------------------------------------------------------------ #
-    stage2_values, stage2_dir_ids = [], []
-    for cls in range(10):
-        vals, dids = winner_take_all(stage1_values[cls], stage1_dir_ids[cls])
-        stage2_values.append(vals); stage2_dir_ids.append(dids)
-    print_summary(2, "Winner-Take-All", stage2_values)
-    out_dir2 = os.path.join(out_base, "stage2")
-    visualize_all_digits("stage2", stage2_values, stage2_dir_ids, out_dir2)
-    print(f"Stage 2 visualizations saved to {out_dir2}/")
+    # # ------------------------------------------------------------------ #
+    # # Stage 2 — Winner-Take-All
+    # # ------------------------------------------------------------------ #
+    # stage2_values, stage2_dir_ids = [], []
+    # for cls in range(10):
+    #     vals, dids = winner_take_all(stage1_values[cls], stage1_dir_ids[cls])
+    #     stage2_values.append(vals); stage2_dir_ids.append(dids)
+    # print_summary(2, "Winner-Take-All", stage2_values)
+    # out_dir2 = os.path.join(out_base, "stage2")
+    # visualize_all_digits("stage2", stage2_values, stage2_dir_ids, out_dir2)
+    # print(f"Stage 2 visualizations saved to {out_dir2}/")
 
-    # ------------------------------------------------------------------ #
-    # Stage 3 — Spatial Pooling
-    # ------------------------------------------------------------------ #
-    stage3_values, stage3_dir_ids = [], []
-    for cls in range(10):
-        vals, dids = spatial_pooling(stage2_values[cls], stage2_dir_ids[cls], 2, 2)
-        stage3_values.append(vals); stage3_dir_ids.append(dids)
-    print_summary(3, "Spatial Pooling", stage3_values)
-    out_dir3 = os.path.join(out_base, "stage3")
-    visualize_all_digits("stage3", stage3_values, stage3_dir_ids, out_dir3)
-    print(f"Stage 3 visualizations saved to {out_dir3}/")
+    # # ------------------------------------------------------------------ #
+    # # Stage 3 — Spatial Pooling
+    # # ------------------------------------------------------------------ #
+    # stage3_values, stage3_dir_ids = [], []
+    # for cls in range(10):
+    #     vals, dids = spatial_pooling(stage2_values[cls], stage2_dir_ids[cls], 2, 2)
+    #     stage3_values.append(vals); stage3_dir_ids.append(dids)
+    # print_summary(3, "Spatial Pooling", stage3_values)
+    # out_dir3 = os.path.join(out_base, "stage3")
+    # visualize_all_digits("stage3", stage3_values, stage3_dir_ids, out_dir3)
+    # print(f"Stage 3 visualizations saved to {out_dir3}/")
 
     # ------------------------------------------------------------------ #
     # Stage 4 — Sweep Detection
