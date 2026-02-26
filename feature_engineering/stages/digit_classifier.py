@@ -52,10 +52,9 @@ import numpy as np
 from primitives.core import apply_primitive, apply_cassian as _apply_cassian
 
 
-# Channel labels for the combined Stage-5 map fed into classify().
-# Order must match: [h_pool channels..., v_pool channels...]
-# These are the .name fields of H_DETECTORS + V_DETECTORS in mnist_pipeline.py.
-STAGE5_CHANNEL_LABELS: list[str] = ["h_line", "v_line"]
+# Channel labels for the combined map fed into classify().
+# Order must match: [h_line, d_line, v_line] from run_pipeline output.
+STAGE5_CHANNEL_LABELS: list[str] = ["h_line", "d_line", "v_line"]
 
 
 # ---------------------------------------------------------------------------

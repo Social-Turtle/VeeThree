@@ -26,6 +26,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from primitives.core import apply_cassian
+
 # Channel labels for Stage-3 output — maps each channel index to a direction.
 #   channels 0,1 = vertical; 2,3 = horizontal; 4,5 = diagonal-1; 6,7 = diagonal-2
 STAGE3_CHANNEL_LABELS: list[str] = ["v", "v", "h", "h", "d1", "d1", "d2", "d2"]
@@ -35,6 +37,26 @@ STAGE3_CHANNEL_LABELS: list[str] = ["v", "v", "h", "h", "d1", "d1", "d2", "d2"]
 class SweepDetector:
     pattern: list[str]   # ordered sequence of direction labels, e.g. ["h", "v", "h"]
     output_color: tuple  # RGB base color for visualization, e.g. (0, 0, 255)
+    name: str = ""
+
+
+@dataclass
+class CassianSweepDetector:
+    """Sliding-window Cassian sweep detector.
+
+    Instead of matching an ordered sequence, slides a window of
+    `window_size` pixels along each row (horizontal) or column
+    (vertical).  At each position, counts how many pixels in the
+    window have the target direction active.  Fires if the count
+    meets `threshold`, using apply_cassian from core.py.
+
+    The fire value is the minimum finite value across all active
+    pixels in the window.
+    """
+    direction: str       # single direction label to look for, e.g. "h"
+    window_size: int     # number of consecutive pixels in the window
+    threshold: int       # minimum active pixels to fire
+    output_color: tuple  # RGB base color for visualization
     name: str = ""
 
 
@@ -208,6 +230,144 @@ def sweep_vertical(
 
     output_labels = [
         d.name if d.name else f"detector_{i}" for i, d in enumerate(detectors)
+    ]
+    return firing_map, output_labels
+
+
+# ---------------------------------------------------------------------------
+# Cassian sweep — sliding-window threshold detection
+# ---------------------------------------------------------------------------
+
+def cassian_sweep_horizontal(
+    input_values: np.ndarray,
+    channel_labels: list[str],
+    detectors: list[CassianSweepDetector],
+    view: int = 1,
+    scan_view: int = 1,
+) -> tuple[np.ndarray, list[str]]:
+    """Horizontal Cassian sweep (sliding window left→right).
+
+    For each detector, slides a window of `window_size` columns across
+    each row-band.  At each window position, collects the values from
+    pixels that have the target direction active, then feeds them to
+    apply_cassian.  If at least `threshold` pixels in the window are
+    active, the detector fires with the min finite value in the window.
+
+    Parameters
+    ----------
+    input_values   : (H, W, C) float64
+    channel_labels : length-C label list
+    detectors      : list of CassianSweepDetector
+    view           : row-band height (cross-sectional compression)
+    scan_view      : output column bin size
+
+    Returns
+    -------
+    firing_map : (H // view, W // scan_view, D) float64
+    output_channel_labels : list[str], length D
+    """
+    H, W, _ = input_values.shape
+    D = len(detectors)
+    n_row_bands = H // view
+    n_col_bins = W // scan_view
+    firing_map = np.full((n_row_bands, n_col_bins, D), np.inf)
+
+    for d_idx, det in enumerate(detectors):
+        ws = det.window_size
+        for band_idx in range(n_row_bands):
+            row_start = band_idx * view
+            row_end = row_start + view
+
+            for col in range(W - ws + 1):
+                # Collect values from the window for this band.
+                window_vals = []
+                for wc in range(col, col + ws):
+                    for r in range(row_start, row_end):
+                        if _is_active(input_values, channel_labels, r, wc, det.direction):
+                            window_vals.append(_value_at(input_values, r, wc))
+                            break  # one active row in band is enough for this column
+                    else:
+                        window_vals.append(np.inf)
+
+                # Apply Cassian: fire if >= threshold values are finite.
+                vals_arr = np.array(window_vals)
+                result = apply_cassian(vals_arr.reshape(1, -1), det.threshold)
+                if np.isfinite(result.squeeze()):
+                    finite_in_window = vals_arr[np.isfinite(vals_arr)]
+                    value = float(finite_in_window.min())
+                    out_col = (col + ws // 2) // scan_view  # center of window
+                    out_col = min(out_col, n_col_bins - 1)
+                    firing_map[band_idx, out_col, d_idx] = min(
+                        firing_map[band_idx, out_col, d_idx], value
+                    )
+
+    output_labels = [
+        d.name if d.name else f"cassian_{i}" for i, d in enumerate(detectors)
+    ]
+    return firing_map, output_labels
+
+
+def cassian_sweep_vertical(
+    input_values: np.ndarray,
+    channel_labels: list[str],
+    detectors: list[CassianSweepDetector],
+    view: int = 1,
+    scan_view: int = 1,
+) -> tuple[np.ndarray, list[str]]:
+    """Vertical Cassian sweep (sliding window top→bottom).
+
+    Mirror of cassian_sweep_horizontal along the column axis.
+
+    Parameters
+    ----------
+    input_values   : (H, W, C) float64
+    channel_labels : length-C label list
+    detectors      : list of CassianSweepDetector
+    view           : column-band width (cross-sectional compression)
+    scan_view      : output row bin size
+
+    Returns
+    -------
+    firing_map : (H // scan_view, W // view, D) float64
+    output_channel_labels : list[str], length D
+    """
+    H, W, _ = input_values.shape
+    D = len(detectors)
+    n_col_bands = W // view
+    n_row_bins = H // scan_view
+    firing_map = np.full((n_row_bins, n_col_bands, D), np.inf)
+
+    for d_idx, det in enumerate(detectors):
+        ws = det.window_size
+        for band_idx in range(n_col_bands):
+            col_start = band_idx * view
+            col_end = col_start + view
+
+            for row in range(H - ws + 1):
+                # Collect values from the window for this band.
+                window_vals = []
+                for wr in range(row, row + ws):
+                    for c in range(col_start, col_end):
+                        if _is_active(input_values, channel_labels, wr, c, det.direction):
+                            window_vals.append(_value_at(input_values, wr, c))
+                            break  # one active col in band is enough for this row
+                    else:
+                        window_vals.append(np.inf)
+
+                # Apply Cassian: fire if >= threshold values are finite.
+                vals_arr = np.array(window_vals)
+                result = apply_cassian(vals_arr.reshape(1, -1), det.threshold)
+                if np.isfinite(result.squeeze()):
+                    finite_in_window = vals_arr[np.isfinite(vals_arr)]
+                    value = float(finite_in_window.min())
+                    out_row = (row + ws // 2) // scan_view  # center of window
+                    out_row = min(out_row, n_row_bins - 1)
+                    firing_map[out_row, band_idx, d_idx] = min(
+                        firing_map[out_row, band_idx, d_idx], value
+                    )
+
+    output_labels = [
+        d.name if d.name else f"cassian_{i}" for i, d in enumerate(detectors)
     ]
     return firing_map, output_labels
 

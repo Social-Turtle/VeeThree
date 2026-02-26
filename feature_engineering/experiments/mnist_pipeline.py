@@ -19,6 +19,7 @@ from stages.winner_take_all import winner_take_all
 from stages.spatial_pooling import spatial_pooling
 from stages.sweep_detection import (
     SweepDetector, sweep_horizontal, sweep_vertical,
+    CassianSweepDetector, cassian_sweep_horizontal, cassian_sweep_vertical,
     tighten_columns, tighten_rows,
     STAGE3_CHANNEL_LABELS,
 )
@@ -31,31 +32,105 @@ from visualization.sweep_viz import visualize_sweep
 # Detectors — defined at module level so both main() and evaluate()
 # use the same configuration.
 # ------------------------------------------------------------------ #
+# Cassian sweep detectors: window_size / threshold are configurable.
+# Start with 3/2 (fire if ≥2 of 3 consecutive pixels are active).
 H_DETECTORS = [
-    SweepDetector(["h", "h"], output_color=(0, 0, 255), name="h_line"),
+    CassianSweepDetector("v", window_size=3, threshold=2, output_color=(0, 0, 255), name="h_line"),
 ]
 V_DETECTORS = [
-    SweepDetector(["v", "v"], output_color=(255, 0, 0), name="v_line"),
+    CassianSweepDetector("h", window_size=3, threshold=2, output_color=(255, 0, 0), name="v_line"),
+]
+D_DETECTORS = [
+    CassianSweepDetector("d", window_size=3, threshold=2, output_color=(0, 200, 0), name="d_line"),
 ]
 
 
 # ------------------------------------------------------------------ #
-# Single-image pipeline (stages 1-4, no visualization)
+# Stage-1 post-processing: derive "d" channel from h+v co-occurrence
+# ------------------------------------------------------------------ #
+# Stage-1 channel labels for the 4 active directions.
+STAGE1_CHANNEL_LABELS: list[str] = ["v", "v", "h", "h"]
+
+
+def _add_diagonal_channel(values: np.ndarray) -> tuple[np.ndarray, list[str]]:
+    """Derive a "d" channel wherever both h and v are present at a pixel.
+
+    Parameters
+    ----------
+    values : (H, W, 4+) float64 from stage 1 (channels 0-1 = v, 2-3 = h)
+
+    Returns
+    -------
+    enriched : (H, W, 5) float64 — original 4 channels + derived "d"
+    labels   : length-5 channel label list
+    """
+    H, W = values.shape[:2]
+    v_channels = values[:, :, 0:2]   # v_down, v_up
+    h_channels = values[:, :, 2:4]   # h_right, h_left
+
+    # Pixel has "v" if ANY v-channel is finite, likewise for "h".
+    has_v = np.any(np.isfinite(v_channels), axis=2)
+    has_h = np.any(np.isfinite(h_channels), axis=2)
+    has_both = has_v & has_h
+
+    # Derive "d" value: use the min finite value across all 4 channels.
+    d_channel = np.full((H, W, 1), np.inf)
+    for ch in range(4):
+        mask = has_both & np.isfinite(values[:, :, ch])
+        d_channel[:, :, 0] = np.where(
+            mask, np.minimum(d_channel[:, :, 0], values[:, :, ch]), d_channel[:, :, 0],
+        )
+
+    enriched = np.concatenate([values[:, :, 0:4], d_channel], axis=2)
+    labels = STAGE1_CHANNEL_LABELS + ["d"]
+    return enriched, labels
+
+
+# ------------------------------------------------------------------ #
+# Single-image pipeline (stages 1 + Cassian sweep)
 # ------------------------------------------------------------------ #
 def run_pipeline(image: np.ndarray) -> np.ndarray:
-    """Run stages 1-4 on one (28, 28) float64 image.
+    """Run stage 1, derive diagonals, then Cassian sweep detection.
 
-    Returns the combined Stage-4 map: (H, W, 2) float64
-      ch 0 = h_line sweep output
-      ch 1 = v_line sweep output
+    Stages 2 (WTA) and 3 (pooling) are skipped so that interleaved
+    h/v patterns at diagonal strokes are preserved.  A derived "d"
+    channel is added wherever h and v co-occur at the same pixel.
+
+    Cassian sweeps use a sliding window with a threshold (e.g. 2/3)
+    instead of strict sequential matching, filtering noise at
+    detection time.
+
+    Returns the combined map: (H, W, 3) float64
+      ch 0 = h_line, ch 1 = d_line, ch 2 = v_line
     """
-    v1, d1 = edge_detection(image)
-    v2, d2 = winner_take_all(v1, d1)
-    v3, _  = spatial_pooling(v2, d2, 2, 2)
+    v1, _ = edge_detection(image)
+    enriched, labels = _add_diagonal_channel(v1)
 
-    hm, _ = sweep_horizontal(v3, STAGE3_CHANNEL_LABELS, H_DETECTORS)
-    vm, _ = sweep_vertical(  v3, STAGE3_CHANNEL_LABELS, V_DETECTORS)
-    return np.concatenate([hm, vm], axis=2)
+    hm, _ = cassian_sweep_horizontal(enriched, labels, H_DETECTORS)
+    vm, _ = cassian_sweep_vertical(  enriched, labels, V_DETECTORS)
+
+    # Diagonal: sweep both H and V, merge into one channel (take min).
+    dh, _ = cassian_sweep_horizontal(enriched, labels, D_DETECTORS)
+    dv, _ = cassian_sweep_vertical(  enriched, labels, D_DETECTORS)
+    H_max = max(hm.shape[0], vm.shape[0], dh.shape[0], dv.shape[0])
+    W_max = max(hm.shape[1], vm.shape[1], dh.shape[1], dv.shape[1])
+
+    d_merged = np.full((H_max, W_max, 1), np.inf)
+    for d_map in (dh, dv):
+        h, w, _ = d_map.shape
+        active = np.isfinite(d_map[:, :, 0])
+        d_merged[:h, :w, 0] = np.where(
+            active,
+            np.minimum(d_merged[:h, :w, 0], d_map[:, :, 0]),
+            d_merged[:h, :w, 0],
+        )
+
+    # Pad all to same spatial size, concatenate as [h_line, d_line, v_line].
+    hm_pad = np.full((H_max, W_max, hm.shape[2]), np.inf)
+    vm_pad = np.full((H_max, W_max, vm.shape[2]), np.inf)
+    hm_pad[:hm.shape[0], :hm.shape[1], :] = hm
+    vm_pad[:vm.shape[0], :vm.shape[1], :] = vm
+    return np.concatenate([hm_pad, d_merged, vm_pad], axis=2)
 
 
 # ------------------------------------------------------------------ #
@@ -272,29 +347,23 @@ def main(n_eval) -> None:  # n_eval: False = skip, None = all, int = N/class
     # print(f"Stage 3 visualizations saved to {out_dir3}/")
 
     # ------------------------------------------------------------------ #
-    # Stage 4 — Sweep Detection
+    # Stage 4 — Cassian Sweep Detection (H + D + V)
     # ------------------------------------------------------------------ #
-    all_colors = [d.output_color for d in H_DETECTORS + V_DETECTORS]
+    all_colors = [d.output_color for d in H_DETECTORS + D_DETECTORS + V_DETECTORS]
     out_dir4 = os.path.join(out_base, "stage4")
     os.makedirs(out_dir4, exist_ok=True)
     stage4_maps = []
 
-    print("\nStage 4 — Sweep Detection (H + V)")
-    print(f"{'Digit':<6}| {'H fires':<10}| {'V fires':<10}| Shape")
-    print(f"{'------'}+{'----------'}+{'----------'}+-----")
+    print("\nStage 4 — Cassian Sweep Detection (H + D + V)")
+    print(f"{'Digit':<6}| {'H fires':<10}| {'D fires':<10}| {'V fires':<10}| Shape")
+    print(f"{'------'}+{'----------'}+{'----------'}+{'----------'}+-----")
     for cls in range(10):
-        s3 = stage3_values[cls]
-        hm, _ = sweep_horizontal(s3, STAGE3_CHANNEL_LABELS, H_DETECTORS)
-        vm, _ = sweep_vertical(  s3, STAGE3_CHANNEL_LABELS, V_DETECTORS)
-        # hm is (H//2, W, Dh) and vm is (H, W//2, Dv) — pad both to the same spatial size
-        Hh, Wh, Dh = hm.shape
-        Hv, Wv, Dv = vm.shape
-        H_max, W_max = max(Hh, Hv), max(Wh, Wv)
-        hm_pad = np.full((H_max, W_max, Dh), np.inf); hm_pad[:Hh, :Wh, :] = hm
-        vm_pad = np.full((H_max, W_max, Dv), np.inf); vm_pad[:Hv, :Wv, :] = vm
-        combined = np.concatenate([hm_pad, vm_pad], axis=2)
+        combined = run_pipeline(images[cls])
         stage4_maps.append(combined)
-        print(f"{cls:<6}| {int(np.isfinite(hm).sum()):<10}| {int(np.isfinite(vm).sum()):<10}| {combined.shape[0]}×{combined.shape[1]}")
+        h_fires = int(np.isfinite(combined[:, :, 0]).sum())
+        d_fires = int(np.isfinite(combined[:, :, 1]).sum())
+        v_fires = int(np.isfinite(combined[:, :, 2]).sum())
+        print(f"{cls:<6}| {h_fires:<10}| {d_fires:<10}| {v_fires:<10}| {combined.shape[0]}x{combined.shape[1]}")
         visualize_sweep(combined, all_colors).save(os.path.join(out_dir4, f"stage4_digit{cls}.png"))
     print(f"Stage 4 visualizations saved to {out_dir4}/")
 
