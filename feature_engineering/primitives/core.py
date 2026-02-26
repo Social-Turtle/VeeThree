@@ -6,7 +6,7 @@ def apply_primitive(sequences: np.ndarray) -> np.ndarray:
     Returns: (...,) float array — last element if strictly increasing left-to-right, np.inf otherwise.
     """
     diffs = np.diff(sequences, axis=-1)
-    strictly_increasing = np.all(diffs > 0, axis=-1)
+    strictly_increasing = np.all(diffs >= 0, axis=-1)
     result = np.where(strictly_increasing, sequences[..., -1], np.inf)
     return result
 
