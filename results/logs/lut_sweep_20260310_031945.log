@@ -1,0 +1,54 @@
+warning: `VIRTUAL_ENV=/Users/2cale/Documents/Classes/Research/SoftwareTools/3dHtree/.venv` does not match the project environment path `/Users/2cale/.venv` and will be ignored; use `--active` to target the active environment instead
+Configs: 15  |  epochs: 5
+Loading MNIST...
+Loading training data...
+  Loaded 60000 training samples
+Loading test data...
+  Loaded 10000 test samples
+
+[LUT] {"N_T": 4, "EMBED_DIM": 16, "N_GRID": 2}
+  acc=49.53%  active_bits=148  time=49.9s
+
+[LUT] {"N_T": 4, "EMBED_DIM": 16, "N_GRID": 4}
+  acc=42.72%  active_bits=357  time=128.7s
+
+[LUT] {"N_T": 4, "EMBED_DIM": 32, "N_GRID": 2}
+  acc=46.99%  active_bits=212  time=50.1s
+
+[LUT] {"N_T": 4, "EMBED_DIM": 32, "N_GRID": 4}
+  acc=53.29%  active_bits=508  time=129.3s
+
+[LUT] {"N_T": 8, "EMBED_DIM": 16, "N_GRID": 2}
+  acc=84.99%  active_bits=196  time=51.7s
+
+[LUT] {"N_T": 8, "EMBED_DIM": 16, "N_GRID": 4}
+  acc=80.74%  active_bits=464  time=133.5s
+
+[LUT] {"N_T": 8, "EMBED_DIM": 32, "N_GRID": 2}
+  acc=86.01%  active_bits=289  time=52.0s
+
+[LUT] {"N_T": 8, "EMBED_DIM": 32, "N_GRID": 4}
+  acc=82.97%  active_bits=732  time=135.1s
+
+[LUT] {"N_T": 8, "EMBED_DIM": 64, "N_GRID": 4}
+  acc=84.79%  active_bits=1114  time=137.2s
+
+[LUT] {"N_T": 16, "EMBED_DIM": 32, "N_GRID": 4}
+  acc=91.92%  active_bits=932  time=145.0s
+
+[LUT] {"N_T": 16, "EMBED_DIM": 32, "N_GRID": 7}
+  acc=90.12%  active_bits=2321  time=388.1s
+
+[LUT] {"N_T": 16, "EMBED_DIM": 64, "N_GRID": 4}
+  acc=93.10%  active_bits=1388  time=148.7s
+
+[LUT] {"N_T": 32, "EMBED_DIM": 32, "N_GRID": 4}
+  acc=95.07%  active_bits=1284  time=164.5s
+
+[LUT] {"N_T": 32, "EMBED_DIM": 64, "N_GRID": 4}
+  acc=96.03%  active_bits=1859  time=173.4s
+
+[LUT] {"N_T": 32, "EMBED_DIM": 64, "N_GRID": 7}
+  acc=95.47%  active_bits=4671  time=467.3s
+
+Results saved to /Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/results/lut_pareto.csv

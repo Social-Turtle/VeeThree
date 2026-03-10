@@ -1,0 +1,4 @@
+model,config,accuracy,active_bits_mean,train_time_s
+fe,"{""pool_size"": 1}",10.1,2822.0,0.0
+fe,"{""pool_size"": 2}",10.1,2099.1,0.0
+fe,"{""pool_size"": 4}",9.62,1890.4,0.0

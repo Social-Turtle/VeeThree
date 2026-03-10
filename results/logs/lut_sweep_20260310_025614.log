@@ -1,0 +1,18 @@
+warning: `VIRTUAL_ENV=/Users/2cale/Documents/Classes/Research/SoftwareTools/3dHtree/.venv` does not match the project environment path `/Users/2cale/.venv` and will be ignored; use `--active` to target the active environment instead
+Configs: 3  |  epochs: 2
+Loading MNIST...
+Loading training data...
+  Loaded 1000 training samples
+Loading test data...
+  Loaded 166 test samples
+
+[LUT] {"N_T": 4, "EMBED_DIM": 16, "N_GRID": 2}
+  acc=15.66%  active_bits=145  time=0.4s
+
+[LUT] {"N_T": 8, "EMBED_DIM": 32, "N_GRID": 4}
+  acc=9.04%  active_bits=702  time=0.9s
+
+[LUT] {"N_T": 16, "EMBED_DIM": 64, "N_GRID": 4}
+  acc=18.67%  active_bits=1452  time=1.1s
+
+Results saved to /Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/results/lut_pareto.csv

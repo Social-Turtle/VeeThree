@@ -1,0 +1,13 @@
+warning: `VIRTUAL_ENV=/Users/2cale/Documents/Classes/Research/SoftwareTools/3dHtree/.venv` does not match the project environment path `/Users/2cale/.venv` and will be ignored; use `--active` to target the active environment instead
+Configs: 3  |  n_per_class: all
+
+[FE] {"pool_size": 1}
+  acc=10.10%  active_bits=2822.0  time=323.2s
+
+[FE] {"pool_size": 2}
+  acc=10.10%  active_bits=2099.1  time=85.0s
+
+[FE] {"pool_size": 4}
+  acc=9.62%  active_bits=1890.4  time=22.8s
+
+Results saved to /Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/results/fe_pareto.csv

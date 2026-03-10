@@ -1,4 +1,4 @@
-"""Run feature-engineering pipeline across pool_size × active_dirs configs.
+"""Run feature-engineering pipeline across pool_size configs.
 
 Output: results/fe_pareto.csv
 
@@ -20,33 +20,20 @@ _FE_DIR    = os.path.join(_VEETHREE, "feature_engineering")
 _RESULTS   = os.path.join(_VEETHREE, "results")
 
 # The FE pipeline must be imported from inside feature_engineering/
+sys.path.insert(0, _VEETHREE)
 sys.path.insert(0, _FE_DIR)
 sys.path.insert(0, os.path.join(_FE_DIR, "experiments"))
 
 from mnist_pipeline import evaluate_with_config
-from benchmark.metrics import fe_active_bits  # noqa: re-export for doc clarity
 
 
 # ------------------------------------------------------------------ #
-# Sweep configurations  (pool_size, n_active_dirs)
+# Sweep configurations  (pool_size only — active_dirs sweep deferred
+# until more edge directions are implemented in edge_detection.py)
 # ------------------------------------------------------------------ #
 
-FULL_CONFIGS = [
-    (1, 8),
-    (1, 4),
-    (2, 8),
-    (2, 4),
-    (2, 2),
-    (4, 8),
-    (4, 4),
-    (4, 2),
-]
-
-QUICK_CONFIGS = [
-    (1, 8),
-    (2, 8),
-    (4, 8),
-]
+FULL_CONFIGS  = [1, 2, 4]
+QUICK_CONFIGS = [1, 2, 4]   # same — only 3 meaningful pool_size values
 
 
 # ------------------------------------------------------------------ #
@@ -55,15 +42,14 @@ QUICK_CONFIGS = [
 
 def run_sweep(configs, n_per_class):
     rows = []
-    for pool_size, n_active_dirs in configs:
-        config_str = json.dumps({"pool_size": pool_size, "active_dirs": n_active_dirs})
+    for pool_size in configs:
+        config_str = json.dumps({"pool_size": pool_size})
         print(f"\n[FE] {config_str}")
 
         t0 = time.time()
         accuracy, mean_active_bits = evaluate_with_config(
             n_per_class=n_per_class,
             pool_size=pool_size,
-            n_active_dirs=n_active_dirs,
         )
         elapsed = time.time() - t0
 
@@ -82,7 +68,7 @@ def run_sweep(configs, n_per_class):
 def main():
     parser = argparse.ArgumentParser(description="FE Pareto sweep")
     parser.add_argument("--quick", action="store_true",
-                        help="3 configs, 50 examples per class")
+                        help="50 examples per class")
     parser.add_argument("--n-per-class", type=int, default=None,
                         help="Override samples per class (None = full test set)")
     args = parser.parse_args()

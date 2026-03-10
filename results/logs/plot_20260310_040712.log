@@ -1,0 +1,6 @@
+warning: `VIRTUAL_ENV=/Users/2cale/Documents/Classes/Research/SoftwareTools/3dHtree/.venv` does not match the project environment path `/Users/2cale/.venv` and will be ignored; use `--active` to target the active environment instead
+Loaded 13 rows from cnn_pareto.csv
+Loaded 15 rows from lut_pareto.csv
+Loaded 3 rows from fe_pareto.csv
+
+Plot saved to /Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/results/pareto_active_bits.png

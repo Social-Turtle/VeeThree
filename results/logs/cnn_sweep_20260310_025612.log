@@ -1,0 +1,13 @@
+warning: `VIRTUAL_ENV=/Users/2cale/Documents/Classes/Research/SoftwareTools/3dHtree/.venv` does not match the project environment path `/Users/2cale/.venv` and will be ignored; use `--active` to target the active environment instead
+Device: cpu  |  configs: 3  |  epochs: 3
+
+[CNN] {"arch": "linear", "n_filters": 8, "n_filters2": 16, "hidden_size": 128}
+  acc=82.00%  active_bits=160  time=0.2s
+
+[CNN] {"arch": "small", "n_filters": 8, "n_filters2": 16, "hidden_size": 128}
+  acc=84.00%  active_bits=47097  time=0.3s
+
+[CNN] {"arch": "lenet", "n_filters": 8, "n_filters2": 16, "hidden_size": 128}
+  acc=84.50%  active_bits=67931  time=0.6s
+
+Results saved to /Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/results/cnn_pareto.csv

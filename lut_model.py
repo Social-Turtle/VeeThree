@@ -39,6 +39,12 @@ def Up(u):
     return -0.5 * _sign(u) / (1 + abs(u)) / (1 + abs(u))
 
 
+def _Up_vec(u):
+    """Vectorized Up for NumPy arrays (same formula, array-safe sign)."""
+    signs = np.where(u > 0, 1.0, -1.0)
+    return -0.5 * signs / (1.0 + np.abs(u)) ** 2
+
+
 def learning_rate(t):
     """LR schedule (main.c:35).
 
@@ -92,20 +98,24 @@ class LUT:
         """Forward index computation (main.c:169-186).
 
         Vectorized: all N_T × N_C comparisons computed in two NumPy index ops.
-        Returns j (table row indices), r_min, u_min — each length N_T.
+        Returns j (table row indices), r_min, u_min — each length N_T — plus
+        total spike count (popcount of all fired bits).
         """
         # u[i, r] = x[anchors_a[i,r]] - x[anchors_b[i,r]]   shape (N_T, N_C)
         u = x[self.anchors_a] - x[self.anchors_b]
 
+        fired = u > 0                                           # (N_T, N_C) bool
+
         # j[i] = bitmask of which comparisons fired (u > 0)
-        powers = (1 << np.arange(N_C, dtype=np.int32))   # [1, 2, 4, …, 32]
-        j = ((u > 0).astype(np.int32) * powers).sum(axis=1)  # (N_T,)
+        powers = (1 << np.arange(N_C, dtype=np.int32))         # [1, 2, 4, …, 32]
+        j = (fired.astype(np.int32) * powers).sum(axis=1)      # (N_T,)
 
         # r_min[i] = index of the comparison with smallest |u|
-        r_min = np.abs(u).argmin(axis=1)                  # (N_T,)
-        u_min = u[np.arange(N_T), r_min]                  # (N_T,)
+        r_min = np.abs(u).argmin(axis=1)                       # (N_T,)
+        u_min = u[np.arange(N_T), r_min]                       # (N_T,)
 
-        return j, r_min, u_min
+        spikes = int(fired.sum())                               # total popcount
+        return j, r_min, u_min, spikes
 
     def forward(self, x):
         """LUT_forward (main.c:206-214).
@@ -115,12 +125,9 @@ class LUT:
           cache  = (j, r_min, u_min) for backward
           spikes = total active comparisons (popcount of all j[i])
         """
-        j, r_min, u_min = self.cache_index(x)
-        y = np.zeros(self.y_dim, dtype=np.float32)
-        spikes = 0
-        for i in range(N_T):
-            y += self.S[i, j[i]]
-            spikes += bin(int(j[i])).count('1')
+        j, r_min, u_min, spikes = self.cache_index(x)
+        # Gather the N_T selected rows and sum: S[arange, j] → (N_T, y_dim)
+        y = self.S[np.arange(N_T), j].sum(axis=0)
         return y, (j, r_min, u_min), spikes
 
     def backward(self, x, cache, y_grad, lr):
@@ -129,14 +136,29 @@ class LUT:
         Updates S in-place. Returns x_grad.
         """
         j, r_min, u_min = cache
+        idx = np.arange(N_T)
+
+        # Flip the minimum-margin bit to get the counterfactual row index
+        jbar = j ^ (1 << r_min)                                    # (N_T,)
+
+        # gi[i] = y_grad · (S[i,jbar[i]] - S[i,j[i]])
+        diff = self.S[idx, jbar] - self.S[idx, j]                  # (N_T, y_dim)
+        gi   = diff @ y_grad                                        # (N_T,)
+
+        # v[i] = gi[i] * Up(u_min[i])
+        v = gi * _Up_vec(u_min)                                     # (N_T,)
+
+        # Scatter v into x_grad; anchors may repeat, so use np.add.at
+        a_idx = self.anchors_a[idx, r_min]                         # (N_T,)
+        b_idx = self.anchors_b[idx, r_min]                         # (N_T,)
         x_grad = np.zeros(self.input_dim, dtype=np.float32)
-        for i in range(N_T):
-            jbar = j[i] ^ (1 << r_min[i])
-            gi = float(y_grad @ (self.S[i, jbar] - self.S[i, j[i]]))
-            v  = gi * Up(u_min[i])
-            x_grad[self.anchors_a[i, r_min[i]]] += v
-            x_grad[self.anchors_b[i, r_min[i]]] -= v
-            self.S[i, j[i]] -= lr * y_grad
+        np.add.at(x_grad, a_idx,  v)
+        np.add.at(x_grad, b_idx, -v)
+
+        # S update: each (i, j[i]) pair is unique (i is always distinct),
+        # so plain fancy-index assignment is safe
+        self.S[idx, j] -= lr * y_grad                              # (N_T, y_dim) broadcast
+
         return x_grad
 
 
@@ -199,7 +221,6 @@ class LUTModel:
         all_caches is a dict holding every intermediate needed for backward.
         """
         regions = self._split_regions(image)
-        n_regions = len(regions)
 
         # --- Local layers (per region, weight-shared) ---
         local_inputs  = []   # local_inputs[layer_idx]  = list of n_regions input vectors
@@ -211,7 +232,7 @@ class LUTModel:
         output_spikes = 0
 
         current_regions = regions
-        for layer_idx, layer in enumerate(self.local_layers):
+        for layer in self.local_layers:
             layer_inputs  = list(current_regions)
             layer_caches  = []
             layer_outputs = []

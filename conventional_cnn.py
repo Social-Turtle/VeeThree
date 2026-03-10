@@ -105,13 +105,24 @@ class ConventionalCNN(nn.Module):
         return hook
 
     def register_cost_hooks(self) -> None:
-        """Attach hooks to all ReLU layers. Call once before eval inference."""
+        """Attach hooks to all ReLU layers and the final output Linear.
+
+        The output logits are counted: each non-zero logit is an active signal
+        leaving the network, symmetric with how intermediate activations are treated.
+        """
         self.remove_cost_hooks()
         self._active_bits = 0
-        for module in self.net:
+        modules = list(self.net)
+        for module in modules:
             if isinstance(module, nn.ReLU):
                 h = module.register_forward_hook(self._make_hook())
                 self._hooks.append(h)
+        # Hook the last Linear layer (output)
+        for module in reversed(modules):
+            if isinstance(module, nn.Linear):
+                h = module.register_forward_hook(self._make_hook())
+                self._hooks.append(h)
+                break
 
     def remove_cost_hooks(self) -> None:
         """Detach all cost-tracking hooks."""

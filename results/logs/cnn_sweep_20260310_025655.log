@@ -1,0 +1,43 @@
+warning: `VIRTUAL_ENV=/Users/2cale/Documents/Classes/Research/SoftwareTools/3dHtree/.venv` does not match the project environment path `/Users/2cale/.venv` and will be ignored; use `--active` to target the active environment instead
+Device: cpu  |  configs: 13  |  epochs: 10
+
+[CNN] {"arch": "linear", "n_filters": 8, "n_filters2": 16, "hidden_size": 128}
+  acc=92.59%  active_bits=160  time=27.5s
+
+[CNN] {"arch": "small", "n_filters": 4, "n_filters2": 8, "hidden_size": 128}
+  acc=97.30%  active_bits=16370  time=62.9s
+
+[CNN] {"arch": "small", "n_filters": 8, "n_filters2": 16, "hidden_size": 128}
+  acc=97.51%  active_bits=31408  time=66.2s
+
+[CNN] {"arch": "small", "n_filters": 16, "n_filters2": 32, "hidden_size": 128}
+  acc=98.23%  active_bits=47743  time=75.7s
+
+[CNN] {"arch": "small", "n_filters": 32, "n_filters2": 64, "hidden_size": 128}
+  acc=98.25%  active_bits=70589  time=103.6s
+
+[CNN] {"arch": "lenet", "n_filters": 4, "n_filters2": 8, "hidden_size": 64}
+  acc=98.57%  active_bits=24989  time=93.3s
+
+[CNN] {"arch": "lenet", "n_filters": 4, "n_filters2": 8, "hidden_size": 128}
+  acc=98.66%  active_bits=35143  time=104.8s
+
+[CNN] {"arch": "lenet", "n_filters": 8, "n_filters2": 16, "hidden_size": 64}
+  acc=98.97%  active_bits=38243  time=114.4s
+
+[CNN] {"arch": "lenet", "n_filters": 8, "n_filters2": 16, "hidden_size": 128}
+  acc=98.75%  active_bits=73984  time=105.6s
+
+[CNN] {"arch": "lenet", "n_filters": 8, "n_filters2": 16, "hidden_size": 256}
+  acc=98.91%  active_bits=58671  time=106.1s
+
+[CNN] {"arch": "lenet", "n_filters": 16, "n_filters2": 32, "hidden_size": 128}
+  acc=98.93%  active_bits=90346  time=131.5s
+
+[CNN] {"arch": "lenet", "n_filters": 16, "n_filters2": 32, "hidden_size": 256}
+  acc=98.91%  active_bits=81214  time=137.1s
+
+[CNN] {"arch": "lenet", "n_filters": 32, "n_filters2": 64, "hidden_size": 256}
+  acc=98.99%  active_bits=166403  time=202.7s
+
+Results saved to /Users/2cale/Documents/Classes/Research/SoftwareTools/VeeThree/results/cnn_pareto.csv
