@@ -1,0 +1,4 @@
+model,config,accuracy,active_bits_mean,train_time_s
+cnn,"{""arch"": ""linear"", ""n_filters"": 8, ""n_filters2"": 16, ""hidden_size"": 128}",82.0,0.0,0.24
+cnn,"{""arch"": ""small"", ""n_filters"": 8, ""n_filters2"": 16, ""hidden_size"": 128}",83.0,59037.7,0.34
+cnn,"{""arch"": ""lenet"", ""n_filters"": 8, ""n_filters2"": 16, ""hidden_size"": 128}",81.5,87494.1,0.57

@@ -1,0 +1,170 @@
+"""Train LUT model across N_T × EMBED_DIM × N_GRID configs and record Pareto data.
+
+Output: results/lut_pareto.csv
+
+Usage:
+    python benchmark/lut_sweep.py           # full sweep (~hours)
+    python benchmark/lut_sweep.py --quick   # 3 configs, 1000 train / 200 test
+"""
+
+import os
+import sys
+import csv
+import time
+import argparse
+import json
+
+import numpy as np
+
+_BENCH_DIR = os.path.dirname(os.path.abspath(__file__))
+_VEETHREE  = os.path.dirname(_BENCH_DIR)
+_RESULTS   = os.path.join(_VEETHREE, "results")
+sys.path.insert(0, _VEETHREE)
+
+import lut_model as lm
+from main import load_mnist
+from benchmark.metrics import lut_active_bits
+
+
+# ------------------------------------------------------------------ #
+# Sweep configurations  (N_T, EMBED_DIM, N_GRID)
+# ------------------------------------------------------------------ #
+
+FULL_CONFIGS = [
+    (4,  16, 2),
+    (4,  16, 4),
+    (4,  32, 2),
+    (4,  32, 4),
+    (8,  16, 2),
+    (8,  16, 4),
+    (8,  32, 2),
+    (8,  32, 4),
+    (8,  64, 4),
+    (16, 32, 4),
+    (16, 32, 7),
+    (16, 64, 4),
+    (32, 32, 4),
+    (32, 64, 4),
+    (32, 64, 7),
+]
+
+QUICK_CONFIGS = [
+    (4,  16, 2),
+    (8,  32, 4),
+    (16, 64, 4),
+]
+
+
+# ------------------------------------------------------------------ #
+# Helpers
+# ------------------------------------------------------------------ #
+
+def _set_globals(N_T, EMBED_DIM, N_GRID):
+    """Monkey-patch lut_model module constants for the current config run."""
+    lm.N_T       = N_T
+    lm.EMBED_DIM = EMBED_DIM
+    lm.N_GRID    = N_GRID
+
+
+def train(model, images, labels, epochs):
+    """Minimal training loop (no printing). Returns elapsed seconds."""
+    n = len(images)
+    t0 = time.time()
+    global_step = 0
+    for _ in range(epochs):
+        indices = np.random.permutation(n)
+        for idx in indices:
+            global_step += 1
+            model.step(images[idx], labels[idx], t=global_step)
+    return time.time() - t0
+
+
+def evaluate_accuracy(model, images, labels):
+    """Test accuracy as a float in [0, 100]."""
+    correct = 0
+    for image, label in zip(images, labels):
+        logits, _, _ = model.forward(image)
+        if int(np.argmax(logits)) == label:
+            correct += 1
+    return 100.0 * correct / len(images)
+
+
+def measure_active_bits(model, images):
+    """Mean active bits per inference (binary comparisons + float32 LUT outputs)."""
+    total = 0
+    for image in images:
+        logits, caches, spike_counts = model.forward(image)
+        total += lut_active_bits(spike_counts, caches['y_outputs'])
+    return total / len(images)
+
+
+# ------------------------------------------------------------------ #
+# Main sweep
+# ------------------------------------------------------------------ #
+
+def run_sweep(configs, n_train, n_test, epochs):
+    data_dir = os.path.join(_VEETHREE, "mnist", "mnist")
+    print("Loading MNIST...")
+    train_imgs, train_lbls, test_imgs, test_lbls = load_mnist(
+        data_dir=data_dir, max_samples=n_train
+    )
+    # load_mnist caps test at max_samples//6; re-cap explicitly for quick mode
+    if n_test is not None:
+        test_imgs  = test_imgs[:n_test]
+        test_lbls  = test_lbls[:n_test]
+
+    rows = []
+    for N_T, EMBED_DIM, N_GRID in configs:
+        _set_globals(N_T, EMBED_DIM, N_GRID)
+        config_str = json.dumps({"N_T": N_T, "EMBED_DIM": EMBED_DIM, "N_GRID": N_GRID})
+        print(f"\n[LUT] {config_str}")
+
+        model = lm.LUTModel()
+
+        train_time = train(model, train_imgs, train_lbls, epochs)
+        accuracy   = evaluate_accuracy(model, test_imgs, test_lbls)
+        mean_bits  = measure_active_bits(model, test_imgs)
+
+        print(f"  acc={accuracy:.2f}%  active_bits={mean_bits:.0f}  time={train_time:.1f}s")
+        rows.append({
+            "model":            "lut",
+            "config":           config_str,
+            "accuracy":         round(accuracy, 4),
+            "active_bits_mean": round(mean_bits, 1),
+            "train_time_s":     round(train_time, 2),
+        })
+
+    return rows
+
+
+def main():
+    parser = argparse.ArgumentParser(description="LUT Pareto sweep")
+    parser.add_argument("--quick", action="store_true",
+                        help="3 configs, 1000 train / 200 test samples")
+    parser.add_argument("--epochs", type=int, default=None)
+    args = parser.parse_args()
+
+    if args.quick:
+        configs = QUICK_CONFIGS
+        n_train, n_test, epochs = 1000, 200, 2
+    else:
+        configs = FULL_CONFIGS
+        n_train, n_test, epochs = None, None, 5
+
+    if args.epochs is not None:
+        epochs = args.epochs
+
+    print(f"Configs: {len(configs)}  |  epochs: {epochs}")
+    rows = run_sweep(configs, n_train, n_test, epochs)
+
+    os.makedirs(_RESULTS, exist_ok=True)
+    out_path = os.path.join(_RESULTS, "lut_pareto.csv")
+    with open(out_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["model", "config", "accuracy", "active_bits_mean", "train_time_s"])
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f"\nResults saved to {out_path}")
+
+
+if __name__ == "__main__":
+    main()

@@ -58,6 +58,61 @@ def run_pipeline(image: np.ndarray) -> np.ndarray:
     return np.concatenate([hm, vm], axis=2)
 
 
+def run_pipeline_with_config(
+    image: np.ndarray,
+    pool_size: int = 2,
+    n_active_dirs: int = 8,
+) -> tuple[np.ndarray, list[int]]:
+    """Run stages 1-4 with configurable pool size and number of active directions.
+
+    Returns (combined_map, stage_signal_counts) where
+    stage_signal_counts[i] = count of finite (active) signals after stage i+1.
+    """
+    v1, d1 = edge_detection(image)
+
+    # Mask out unused directional channels (simulate fewer detectors)
+    if n_active_dirs < 8:
+        v1 = v1.copy()
+        v1[:, :, n_active_dirs:] = np.inf
+
+    count_s1 = int(np.isfinite(v1).sum())
+
+    v2, d2 = winner_take_all(v1, d1)
+    count_s2 = int(np.isfinite(v2).sum())
+
+    v3, _ = spatial_pooling(v2, d2, pool_size, pool_size)
+    count_s3 = int(np.isfinite(v3).sum())
+
+    hm, _ = sweep_horizontal(v3, STAGE3_CHANNEL_LABELS, H_DETECTORS)
+    vm, _ = sweep_vertical(  v3, STAGE3_CHANNEL_LABELS, V_DETECTORS)
+    combined = np.concatenate([hm, vm], axis=2)
+    count_s4 = int(np.isfinite(combined).sum())
+
+    return combined, [count_s1, count_s2, count_s3, count_s4]
+
+
+def evaluate_with_config(
+    n_per_class: int | None,
+    pool_size: int = 2,
+    n_active_dirs: int = 8,
+) -> tuple[float, float]:
+    """Evaluate pipeline with given config. Returns (accuracy, mean_active_bits)."""
+    samples = load_dataset(n_per_class)
+    correct = 0
+    total_active_bits = 0
+
+    for image, label in samples:
+        combined, stage_counts = run_pipeline_with_config(image, pool_size, n_active_dirs)
+        predicted, _ = classify(combined)
+        if predicted == label:
+            correct += 1
+        total_active_bits += sum(stage_counts)
+
+    accuracy = correct / len(samples)
+    mean_active_bits = total_active_bits / len(samples)
+    return accuracy, mean_active_bits
+
+
 # ------------------------------------------------------------------ #
 # Data loading
 # ------------------------------------------------------------------ #
@@ -151,15 +206,18 @@ def print_summary(stage_num: int, stage_name: str, all_values: list) -> None:
     print(f"\nStage {stage_num} — {stage_name}")
     print(f"{'Digit':<6}| {'Active signals':<16}| {'Min value':<11}| {'Mean value'}")
     print(f"{'------'}+{'----------------'}+{'-----------'}+-----------")
+    active_counts = []
     for cls in range(10):
         vals = all_values[cls]
         finite_mask = np.isfinite(vals)
         active_count = int(finite_mask.sum())
+        active_counts.append(active_count)
         if active_count > 0:
             fv = vals[finite_mask]
             print(f"{cls:<6}| {active_count:<16}| {float(fv.min()):<11.1f}| {float(fv.mean()):.1f}")
         else:
             print(f"{cls:<6}| {active_count:<16}| {'N/A':<11}| N/A")
+    print(f"Mean active across all digits: {np.mean(active_counts):.1f}")
 
 
 def main(n_eval) -> None:  # n_eval: False = skip, None = all, int = N/class

@@ -1,0 +1,4 @@
+model,config,accuracy,active_bits_mean,train_time_s
+lut,"{""N_T"": 4, ""EMBED_DIM"": 16, ""N_GRID"": 2}",16.2651,1518.9,0.41
+lut,"{""N_T"": 8, ""EMBED_DIM"": 32, ""N_GRID"": 4}",15.6627,9057.0,2.0
+lut,"{""N_T"": 16, ""EMBED_DIM"": 64, ""N_GRID"": 4}",11.4458,17367.0,3.89
