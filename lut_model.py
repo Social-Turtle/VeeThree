@@ -16,9 +16,10 @@ N_GRID    = 4    # regions per side → N_GRID×N_GRID non-overlapping regions
 N_T       = 16   # sub-tables per LUT                  (SNN default, main.c:25)
 N_C       = 6    # comparisons per sub-table            (SNN default, main.c:26)
 EMBED_DIM = 32   # LUT output dimension                 (SNN default, main.c:22)
-N_LOCAL   = 1    # local LUT layers per region
-N_GLOBAL  = 2    # global LUT layers after merge
-WARMUP    = 400  # LR warmup steps (SNN default 4000, scaled ~10x for MNIST)
+N_LOCAL      = 1    # local LUT layers per region
+N_GLOBAL     = 2    # global LUT layers after merge
+WARMUP       = 400  # LR warmup steps (SNN default 4000, scaled ~10x for MNIST)
+INPUT_STRIDE = 1    # pixel stride for input sampling (1=every pixel, 2=every other, …)
 N_CLASSES = 10
 
 
@@ -180,9 +181,12 @@ class LUTModel:
     Mirrors SNN's unembedder at the output (main.c:300).
     """
 
-    def __init__(self):
-        region_size = (28 // N_GRID) ** 2   # 49 for N_GRID=4
-        n_regions   = N_GRID * N_GRID        # 16
+    def __init__(self, stride=INPUT_STRIDE):
+        self.stride = stride
+        cell        = 28 // N_GRID
+        sampled     = len(range(0, cell, stride))   # pixels per side after striding
+        region_size = sampled * sampled              # e.g. 49→stride=1, 16→stride=2
+        n_regions   = N_GRID * N_GRID               # 16
 
         # Local LUT layers: weight-shared across all regions
         #   layer 0  : region_size → EMBED_DIM
@@ -205,14 +209,18 @@ class LUTModel:
         self.output_lut = LUT(EMBED_DIM, N_CLASSES)
 
     def _split_regions(self, image):
-        """Split 28×28 image into N_GRID² flattened region vectors."""
+        """Split 28×28 image into N_GRID² flattened region vectors.
+
+        Pixels within each region are sampled at self.stride in both axes,
+        so stride=2 keeps only every other pixel (rows and cols independently).
+        """
         cell = 28 // N_GRID
         regions = []
         for row in range(N_GRID):
             for col in range(N_GRID):
                 patch = image[row*cell:(row+1)*cell, col*cell:(col+1)*cell]
-                regions.append(patch.flatten().astype(np.float32))
-        return regions  # list of N_GRID² arrays, each length cell²
+                regions.append(patch[::self.stride, ::self.stride].flatten().astype(np.float32))
+        return regions  # list of N_GRID² arrays, each length sampled²
 
     def forward(self, image):
         """Full forward pass.

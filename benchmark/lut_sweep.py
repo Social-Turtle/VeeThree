@@ -31,21 +31,27 @@ from benchmark.metrics import lut_active_bits
 # ------------------------------------------------------------------ #
 
 FULL_CONFIGS = [
-    (4,  16, 2),
-    (4,  16, 4),
-    (4,  32, 2),
-    (4,  32, 4),
-    (8,  16, 2),
-    (8,  16, 4),
-    (8,  32, 2),
-    (8,  32, 4),
-    (8,  64, 4),
-    (16, 32, 4),
-    (16, 32, 7),
-    (16, 64, 4),
-    (32, 32, 4),
-    (32, 64, 4),
-    (32, 64, 7),
+    # (4,  16, 2),
+    # (4,  16, 4),
+    # (4,  32, 2),
+    # (4,  32, 4),
+    # (8,  16, 2),
+    # (8,  16, 4),
+    # (8,  32, 2),
+    # (8,  32, 4),
+    # (8,  64, 4),
+    # (16, 32, 4),
+    # (16, 32, 7),
+    # (16, 64, 4),
+    # (32, 32, 4),
+    # (32, 64, 4),
+    # (32, 64, 7),
+    #(16, 8,  7),   # N_T=16, EMBED_DIM=8, N_GRID=7: 49
+    #regions → 8 timing spikes each
+   #(16, 4,  7),   # extreme neckdown: 49 → 4
+    #(8,  8,  7),
+    (16,  6,  4),
+
 ]
 
 QUICK_CONFIGS = [
@@ -159,10 +165,25 @@ def main():
 
     os.makedirs(_RESULTS, exist_ok=True)
     out_path = os.path.join(_RESULTS, "lut_pareto.csv")
-    with open(out_path, "w", newline="") as f:
+
+    # Load existing rows and skip duplicate configs
+    existing_configs = set()
+    file_exists = os.path.exists(out_path)
+    if file_exists:
+        with open(out_path, "r", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                existing_configs.add(row["config"])
+
+    # Filter out rows whose config already exists
+    rows_to_write = [r for r in rows if r["config"] not in existing_configs]
+
+    # Append new rows to CSV
+    with open(out_path, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["model", "config", "accuracy", "active_bits_mean", "train_time_s"])
-        writer.writeheader()
-        writer.writerows(rows)
+        if not file_exists:
+            writer.writeheader()
+        writer.writerows(rows_to_write)
     print(f"\nResults saved to {out_path}")
 
 

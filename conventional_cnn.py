@@ -97,32 +97,27 @@ class ConventionalCNN(nn.Module):
     # Active-bit cost tracking
     # ------------------------------------------------------------------ #
 
-    def _make_hook(self):
-        """Return a forward hook that accumulates active bits from layer output."""
+    def _make_io_hook(self):
+        """Return a forward hook that counts active bits on both sides of a layer.
+
+        For each Conv2d or Linear: charge the signals flowing IN (n_inputs × 16)
+        and the signals flowing OUT (n_outputs × 16).  No double-counting occurs
+        because Conv/Linear outputs pass through ReLU and/or MaxPool before
+        reaching the next Conv/Linear, making them distinct tensors.
+        """
         def hook(module, input, output):
-            # float32: 16 expected active bits per non-zero value
+            self._active_bits += int(torch.count_nonzero(input[0]).item()) * 16
             self._active_bits += int(torch.count_nonzero(output).item()) * 16
         return hook
 
     def register_cost_hooks(self) -> None:
-        """Attach hooks to all ReLU layers and the final output Linear.
-
-        The output logits are counted: each non-zero logit is an active signal
-        leaving the network, symmetric with how intermediate activations are treated.
-        """
+        """Attach I/O hooks to every Conv2d and Linear layer."""
         self.remove_cost_hooks()
         self._active_bits = 0
-        modules = list(self.net)
-        for module in modules:
-            if isinstance(module, nn.ReLU):
-                h = module.register_forward_hook(self._make_hook())
+        for module in self.net:
+            if isinstance(module, (nn.Conv2d, nn.Linear)):
+                h = module.register_forward_hook(self._make_io_hook())
                 self._hooks.append(h)
-        # Hook the last Linear layer (output)
-        for module in reversed(modules):
-            if isinstance(module, nn.Linear):
-                h = module.register_forward_hook(self._make_hook())
-                self._hooks.append(h)
-                break
 
     def remove_cost_hooks(self) -> None:
         """Detach all cost-tracking hooks."""

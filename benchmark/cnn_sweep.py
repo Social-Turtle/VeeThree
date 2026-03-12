@@ -191,10 +191,21 @@ def main():
 
     os.makedirs(_RESULTS, exist_ok=True)
     out_path = os.path.join(_RESULTS, "cnn_pareto.csv")
-    with open(out_path, "w", newline="") as f:
+
+    existing_configs = set()
+    file_exists = os.path.exists(out_path)
+    if file_exists:
+        with open(out_path, "r", newline="") as f:
+            for row in csv.DictReader(f):
+                existing_configs.add(row["config"])
+
+    rows_to_write = [r for r in rows if r["config"] not in existing_configs]
+
+    with open(out_path, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["model", "config", "accuracy", "active_bits_mean", "train_time_s"])
-        writer.writeheader()
-        writer.writerows(rows)
+        if not file_exists:
+            writer.writeheader()
+        writer.writerows(rows_to_write)
     print(f"\nResults saved to {out_path}")
 
 

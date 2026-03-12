@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _SCRIPT_DIR)
 
-from lut_model import LUTModel, N_CLASSES
+from lut_model import LUTModel, N_CLASSES, INPUT_STRIDE
 from main import load_mnist
 
 
@@ -125,9 +125,16 @@ def evaluate(model, images, labels):
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Train LUT-based MNIST classifier.")
+    parser.add_argument("--stride", type=int, default=INPUT_STRIDE,
+                        help="Pixel stride for input sampling (default: %(default)s).")
+    args = parser.parse_args()
+
     print("=" * 50)
     print("LUT Model - MNIST Training")
     print("=" * 50)
+    print(f"Input stride: {args.stride}")
 
     data_dir = os.path.join(_SCRIPT_DIR, "mnist", "mnist")
     train_images, train_labels, test_images, test_labels = load_mnist(
@@ -135,7 +142,7 @@ def main():
     )
 
     print("\nInitializing LUT model...")
-    model = LUTModel()
+    model = LUTModel(stride=args.stride)
 
     print("\nTraining...")
     train(model, train_images, train_labels, epochs=5)
