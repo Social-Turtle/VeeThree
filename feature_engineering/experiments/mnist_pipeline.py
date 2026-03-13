@@ -1,4 +1,5 @@
 """
+feature_engineering approach
 MNIST Ordering-Primitive Pipeline
 Stages 1-6 with visualization and bulk evaluation.
 

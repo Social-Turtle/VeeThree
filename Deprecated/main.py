@@ -1,4 +1,10 @@
 # MNIST Training Pipeline
+"""
+
+Typical_CNN Operator
+
+"""
+
 
 import numpy as np
 import pandas as pd
