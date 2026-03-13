@@ -40,7 +40,8 @@ def cnn_active_signals(model) -> int:
 # LUT active signals
 # --------------------------------------------------------------------------- #
 
-def lut_active_signals(spike_counts: dict, y_outputs: list) -> int:
+def lut_active_signals(spike_counts: dict, y_outputs: list,
+                        first_layer_inputs=None) -> int:
     """Compute active signals for one LUT model forward pass.
 
     Parameters
@@ -50,17 +51,33 @@ def lut_active_signals(spike_counts: dict, y_outputs: list) -> int:
     y_outputs    : list of float32 numpy arrays
         Intermediate output vectors from each LUT layer (local + global),
         stored in all_caches['y_outputs']. Final output logits are excluded.
+    first_layer_inputs : list of arrays or single array, optional
+        Raw inputs transmitted to the first LUT layer:
+          - LUT / Edge-LUT: list of region arrays (all_caches['local_inputs'][0])
+          - FE-LUT: single flat array (all_caches['x'])
+        Each non-zero value represents one voltage spike arriving at the chip,
+        charged at 1 bit regardless of its float32 encoding.
 
     Returns
     -------
-    Total active spikes: binary comparisons + LUT output spikes.
+    Total active signals: first-layer input spikes + binary comparison bits
+    + LUT output spikes.
 
     Note on float32 y outputs: each non-zero entry represents one spike whose
     *timing* is encoded as an FP32 value.  In hardware this is still a single
     spike on a wire, so it costs 1 (not bit_width/2).
     """
+    total = 0
+
+    # First-layer input signals — 1 bit each (single voltage spike per value)
+    if first_layer_inputs is not None:
+        if isinstance(first_layer_inputs, list):
+            total += sum(int(np.count_nonzero(r)) for r in first_layer_inputs)
+        else:
+            total += int(np.count_nonzero(first_layer_inputs))
+
     # Binary comparison bits — exact popcount
-    total = int(spike_counts['total'])
+    total += int(spike_counts['total'])
 
     # Table-lookup outputs: one spike per non-zero entry (timing encoded as FP32)
     for y in y_outputs:

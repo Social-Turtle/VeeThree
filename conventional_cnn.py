@@ -13,7 +13,7 @@ Cost tracking:
              (float32 expected active bits = bit_width/2)
         2) seq2s: always 0 for this model family
         3) adds: scalar additions, scaled by 32-bit arithmetic width
-        4) multiplies: scalar multiplies, scaled by 32-bit arithmetic width
+        4) multiplies: scalar multiplies, scaled by 32² (O(n²) bit cost of n-bit multiply)
 
     Hooks are registered/removed explicitly so they don't slow training.
 
@@ -35,9 +35,11 @@ Typical usage:
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 BIT_WIDTH = 32
+BIT_WIDTH_SQ = BIT_WIDTH * BIT_WIDTH   # O(n²) cost of n-bit multiplication
 EXPECTED_ACTIVE_SIGNAL_BITS = BIT_WIDTH // 2
 
 
@@ -49,6 +51,7 @@ class ConventionalCNN(nn.Module):
         n_filters: int = 8,
         n_filters2: int | None = None,
         hidden_size: int = 128,
+        bits: int | None = None,
     ):
         """
         Parameters
@@ -57,12 +60,15 @@ class ConventionalCNN(nn.Module):
         n_filters   : number of filters in first conv layer (ignored for "linear")
         n_filters2  : filters in second conv ("lenet" only); defaults to n_filters × 2
         hidden_size : hidden units in dense layer ("lenet" only)
+        bits        : if set, fake-quantize all Conv2d/Linear weights to this many bits
+                      per forward pass (symmetric per-tensor scaling)
         """
         super().__init__()
         self.arch = arch
         self.n_filters = n_filters
         self.n_filters2 = n_filters2 if n_filters2 is not None else n_filters * 2
         self.hidden_size = hidden_size
+        self.bits = bits
 
         self._costs = {
             "active_signals": 0,
@@ -105,13 +111,43 @@ class ConventionalCNN(nn.Module):
             raise ValueError(f"Unknown arch: {arch!r}. Choose 'linear', 'small', or 'lenet'.")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
+        if self.bits is None:
+            return self.net(x)
+        # Fake-quantize weights: symmetric per-tensor.
+        # Two paths depending on whether cost hooks are active:
+        #   Training (no hooks): STE — quantized values in forward, identity gradient in backward
+        #     so the optimizer can update weights normally.
+        #   Eval / cost-measurement (hooks registered): temporarily swap weight.data so the
+        #     registered hooks see quantized weights, then restore.
+        n_pos = max(2 ** (self.bits - 1) - 1, 1)
+        for module in self.net:
+            if isinstance(module, (nn.Conv2d, nn.Linear)):
+                w = module.weight
+                scale = w.detach().abs().max().clamp(min=1e-8) / n_pos
+                w_q = torch.clamp(torch.round(w.detach() / scale), -n_pos - 1, n_pos) * scale
+                if self._hooks:
+                    # Hooks path: swap data so hook sees quantized weight, then restore.
+                    orig = w.data.clone()
+                    module.weight.data = w_q
+                    x = module(x)
+                    module.weight.data = orig
+                else:
+                    # Training STE path: w_ste == w_q in forward, gradient == 1 in backward.
+                    w_ste = w + (w_q - w.detach())
+                    if isinstance(module, nn.Conv2d):
+                        x = F.conv2d(x, w_ste, module.bias, module.stride,
+                                     module.padding, module.dilation, module.groups)
+                    else:
+                        x = F.linear(x, w_ste, module.bias)
+            else:
+                x = module(x)
+        return x
 
     # ------------------------------------------------------------------ #
     # Cost tracking
     # ------------------------------------------------------------------ #
 
-    def _make_io_hook(self, is_last_tracked_layer: bool):
+    def _make_io_hook(self, is_last_tracked_layer: bool, effective_bits: int = BIT_WIDTH):
         """Return a forward hook that tracks signals and arithmetic costs.
 
         For each Conv2d/Linear, charge:
@@ -153,8 +189,8 @@ class ConventionalCNN(nn.Module):
             else:
                 return
 
-            self._costs["multiplies"] += int(multiplies) * BIT_WIDTH
-            self._costs["adds"] += int(adds) * BIT_WIDTH
+            self._costs["multiplies"] += int(multiplies) * (effective_bits * effective_bits)
+            self._costs["adds"] += int(adds) * effective_bits
         return hook
 
     def register_cost_hooks(self) -> None:
@@ -168,9 +204,13 @@ class ConventionalCNN(nn.Module):
         ]
         last_idx = tracked_indices[-1] if tracked_indices else None
 
+        effective_bits = self.bits if self.bits is not None else BIT_WIDTH
         for idx, module in enumerate(self.net):
             if isinstance(module, (nn.Conv2d, nn.Linear)):
-                h = module.register_forward_hook(self._make_io_hook(is_last_tracked_layer=(idx == last_idx)))
+                h = module.register_forward_hook(self._make_io_hook(
+                    is_last_tracked_layer=(idx == last_idx),
+                    effective_bits=effective_bits,
+                ))
                 self._hooks.append(h)
 
     def remove_cost_hooks(self) -> None:
@@ -211,4 +251,5 @@ class ConventionalCNN(nn.Module):
             "n_filters": self.n_filters,
             "n_filters2": self.n_filters2,
             "hidden_size": self.hidden_size,
+            "bits": self.bits,
         }

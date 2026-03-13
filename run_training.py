@@ -62,7 +62,7 @@ def _model_config(spec: dict) -> dict:
 def _patch_lut_globals(spec: dict):
     """Monkey-patch lut_model constants from spec before instantiating a model."""
     import lut_model as lm
-    for attr in ("N_T", "N_C", "EMBED_DIM", "N_GRID", "N_LOCAL", "N_GLOBAL", "WARMUP"):
+    for attr in ("N_T", "N_C", "EMBED_DIM", "N_GRID", "N_LOCAL", "N_GLOBAL", "WARMUP", "MIN_LR"):
         if attr in spec:
             setattr(lm, attr, spec[attr])
 
@@ -130,7 +130,12 @@ def _measure_costs_lut(model, images) -> dict:
         _, caches, sc, seq2 = model.forward(img)
         total_seq2s  += int(seq2["total"])
         total_spikes += int(sc["total"])
-        total_active += lut_active_signals(sc, caches.get("y_outputs", []))
+        # First-layer inputs: regions list for LUT/Edge-LUT, flat vector for FE-LUT
+        if caches.get("local_inputs"):
+            first_inputs = caches["local_inputs"][0]
+        else:
+            first_inputs = caches.get("x")
+        total_active += lut_active_signals(sc, caches.get("y_outputs", []), first_inputs)
     n = len(images)
     return {
         "seq2s_per_img":          total_seq2s  / n,

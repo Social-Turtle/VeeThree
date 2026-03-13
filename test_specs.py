@@ -24,7 +24,7 @@ execute them in order and append new rows to the output CSV.
 # Shared training defaults — override per-spec as needed
 # ---------------------------------------------------------------------------
 _DEFAULTS = {
-    "epochs":  5,
+    "epochs":  100,
     "n_train": 10000,
 }
 
@@ -35,7 +35,7 @@ SPECS = [
     # --- LUT baseline (default constants from lut_model.py) ---
     {
         "model": "lut",
-        "N_T": 16, "EMBED_DIM": 32, "N_GRID": 4, "INPUT_STRIDE": 1,
+        "N_T": 32, "EMBED_DIM": 64, "N_GRID": 2, "INPUT_STRIDE": 2,
         **_DEFAULTS,
     },
 
@@ -49,14 +49,14 @@ SPECS = [
     # --- Hybrid 2: Edge-LUT ---
     {
         "model": "edge_lut",
-        "EDGE_STRIDE": 1, "N_GRID": 8,
+        "EDGE_STRIDE": 1, "N_GRID": 2,
         **_DEFAULTS,
     },
 
     # --- CNN baseline ---
     {
         "model": "cnn",
-        "arch": "lenet", "n_filters": 2, "n_filters2": 4, "hidden_size": 64,
+        "arch": "small", "n_filters": 2, "n_filters2": 2, "hidden_size": 3, "bits": 2,
         **_DEFAULTS,
     },
 ]

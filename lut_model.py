@@ -13,12 +13,13 @@ import math
 # ===========================================================================
 
 N_GRID    = 4    # regions per side → N_GRID×N_GRID non-overlapping regions
-N_T       = 16   # sub-tables per LUT                  (SNN default, main.c:25)
-N_C       = 6    # comparisons per sub-table            (SNN default, main.c:26)
+N_T       = 8   # sub-tables per LUT                  (SNN default, main.c:25)
+N_C       = 8    # comparisons per sub-table            (SNN default, main.c:26)
 EMBED_DIM = 32   # LUT output dimension                 (SNN default, main.c:22)
 N_LOCAL      = 1    # local LUT layers per region
 N_GLOBAL     = 2    # global LUT layers after merge
 WARMUP       = 400  # LR warmup steps (SNN default 4000, scaled ~10x for MNIST)
+MIN_LR       = 0.003  # LR floor — prevents 1/√t decay from vanishing on long runs
 INPUT_STRIDE = 1    # pixel stride for input sampling (1=every pixel, 2=every other, …)
 N_CLASSES = 10
 
@@ -47,11 +48,11 @@ def _Up_vec(u):
 
 
 def learning_rate(t):
-    """LR schedule (main.c:35).
+    """LR schedule (main.c:35), with a floor to prevent decay on long runs.
 
     #define LEARNING_RATE (MIN(1/sqrt(1+t), t/(4000)/sqrt(4000)))
     """
-    return min(1.0 / math.sqrt(1 + t), t / WARMUP / math.sqrt(WARMUP))
+    return max(min(1.0 / math.sqrt(1 + t), t / WARMUP / math.sqrt(WARMUP)), MIN_LR)
 
 
 def _softmax(x):
