@@ -122,14 +122,16 @@ class LUT:
         """LUT_forward (main.c:206-214).
 
         y[k] += S[i][j[i] * y_dim + k]  for i in 0..N_T
-        Returns (y, cache, spikes) where:
-          cache  = (j, r_min, u_min) for backward
-          spikes = total active comparisons (popcount of all j[i])
+        Returns (y, cache, spikes, comparisons) where:
+          cache       = (j, r_min, u_min) for backward
+          spikes      = total active comparisons (popcount of all j[i])
+          comparisons = N_T * N_C (total element comparisons made)
         """
         j, r_min, u_min, spikes = self.cache_index(x)
         # Gather the N_T selected rows and sum: S[arange, j] → (N_T, y_dim)
         y = self.S[np.arange(N_T), j].sum(axis=0)
-        return y, (j, r_min, u_min), spikes
+        comparisons = N_T * N_C
+        return y, (j, r_min, u_min), spikes, comparisons
 
     def backward(self, x, cache, y_grad, lr):
         """LUT_backward (main.c:228-241).
@@ -225,7 +227,7 @@ class LUTModel:
     def forward(self, image):
         """Full forward pass.
 
-        Returns (logits, all_caches).
+        Returns (logits, all_caches, spike_counts, seq2s).
         all_caches is a dict holding every intermediate needed for backward.
         """
         regions = self._split_regions(image)
@@ -236,8 +238,11 @@ class LUTModel:
         local_outputs = []   # local_outputs[layer_idx] = list of n_regions output vectors
 
         local_spikes  = []   # spikes per local layer (summed across all regions)
+        local_comps   = []   # comparisons per local layer (summed across all regions)
         global_spikes = []   # spikes per global layer
+        global_comps  = []   # comparisons per global layer
         output_spikes = 0
+        output_comps  = 0
 
         current_regions = regions
         for layer in self.local_layers:
@@ -245,15 +250,18 @@ class LUTModel:
             layer_caches  = []
             layer_outputs = []
             layer_spike_sum = 0
+            layer_comp_sum = 0
             for x in current_regions:
-                y, cache, spikes = layer.forward(x)
+                y, cache, spikes, comparisons = layer.forward(x)
                 layer_caches.append(cache)
                 layer_outputs.append(y)
                 layer_spike_sum += spikes
+                layer_comp_sum += comparisons
             local_inputs.append(layer_inputs)
             local_caches.append(layer_caches)
             local_outputs.append(layer_outputs)
             local_spikes.append(layer_spike_sum)
+            local_comps.append(layer_comp_sum)
             current_regions = layer_outputs
 
         # --- Merge: concatenate final region embeddings ---
@@ -267,21 +275,29 @@ class LUTModel:
         current = merged
         for layer in self.global_layers:
             global_inputs.append(current)
-            y, cache, spikes = layer.forward(current)
+            y, cache, spikes, comparisons = layer.forward(current)
             global_caches.append(cache)
             global_spikes.append(spikes)
+            global_comps.append(comparisons)
             global_outputs.append(y)
             current = y
 
         # --- Output LUT ---
         output_input = current
-        logits, output_cache, output_spikes = self.output_lut.forward(output_input)
+        logits, output_cache, output_spikes, output_comps = self.output_lut.forward(output_input)
 
         spike_counts = {
             'local':  local_spikes,   # list of ints, one per local layer
             'global': global_spikes,  # list of ints, one per global layer
             'output': output_spikes,  # int
             'total':  sum(local_spikes) + sum(global_spikes) + output_spikes,
+        }
+
+        seq2s = {
+            'local':  local_comps,   # list of ints, one per local layer
+            'global': global_comps,  # list of ints, one per global layer
+            'output': output_comps,  # int
+            'total':  sum(local_comps) + sum(global_comps) + output_comps,
         }
 
         # Flat list of all intermediate float32 y outputs (excluding final logits)
@@ -296,17 +312,17 @@ class LUTModel:
             'output_cache':  output_cache,
             'y_outputs':     y_outputs,   # for active-bit cost accounting
         }
-        return logits, all_caches, spike_counts
+        return logits, all_caches, spike_counts, seq2s
 
     def step(self, image, label, t):
         """Forward + backward for one training sample.
 
-        Returns (loss, correct).
+        Returns (loss, correct, spike_counts, seq2s).
         """
         lr = learning_rate(t)
 
         # Forward
-        logits, caches, spike_counts = self.forward(image)
+        logits, caches, spike_counts, seq2s = self.forward(image)
 
         # Softmax + cross-entropy loss (main.c:412-415 pattern)
         probs   = _softmax(logits.astype(np.float64)).astype(np.float32)
@@ -347,4 +363,4 @@ class LUTModel:
                 new_region_grads.append(x_grad)
             region_grads = new_region_grads
 
-        return loss, correct, spike_counts
+        return loss, correct, spike_counts, seq2s

@@ -1,16 +1,17 @@
-"""Training script for the LUT-based MNIST classifier."""
+"""Training script for the FE→LUT hybrid MNIST classifier."""
 
 import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Resolve paths relative to this script so it runs from any working directory
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _SCRIPT_DIR)
 
-from lut_model import LUTModel, N_CLASSES, INPUT_STRIDE
+# Import load_mnist first, before fe_lut_model modifies sys.path (mnist_pipeline.py
+# inserts feature_engineering/ at position 0 as a side-effect of being imported).
 from main import load_mnist
+from fe_lut_model import FELUTModel, N_CLASSES
 
 
 def plot_confusion_matrix(model, images, labels, epoch):
@@ -27,7 +28,7 @@ def plot_confusion_matrix(model, images, labels, epoch):
     ax.set_yticks(range(N_CLASSES))
     ax.set_xlabel('Predicted')
     ax.set_ylabel('True')
-    ax.set_title(f'Confusion Matrix — Epoch {epoch}')
+    ax.set_title(f'Confusion Matrix — FE-LUT Epoch {epoch}')
     plt.colorbar(im, ax=ax)
 
     thresh = cm.max() / 2
@@ -37,7 +38,7 @@ def plot_confusion_matrix(model, images, labels, epoch):
                     color='white' if cm[i, j] > thresh else 'black', fontsize=8)
 
     plt.tight_layout()
-    out_dir = os.path.join(_SCRIPT_DIR, 'visualizations', 'lut')
+    out_dir = os.path.join(_SCRIPT_DIR, 'visualizations', 'fe_lut')
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, f'confusion_epoch{epoch:02d}.png')
     plt.savefig(path, dpi=100)
@@ -47,39 +48,32 @@ def plot_confusion_matrix(model, images, labels, epoch):
 
 
 def train(model, images, labels, epochs=5, print_every=500):
-    """SGD training loop.
-
-    LR follows learning_rate(t) schedule (main.c:35), with t counting
-    globally across all epochs so the schedule doesn't reset each epoch.
-    Prints loss, accuracy, and avg spikes/image every print_every steps.
-    Plots a confusion matrix on the training set at the end of each epoch.
-    """
+    """SGD training loop (mirrors lut_train.py)."""
     n = len(images)
     global_step = 0
 
     for epoch in range(epochs):
         indices = np.random.permutation(n)
-        epoch_loss = 0.0
+        epoch_loss    = 0.0
         epoch_correct = 0
-        # Per-layer accumulators: filled lazily on first step
-        epoch_local = None   # list of floats, one per local layer
-        epoch_global = None  # list of floats, one per global layer
-        epoch_output = 0.0
-        seq2_local = None
-        seq2_global = None
-        seq2_output = 0.0
+        epoch_local   = None
+        epoch_global  = None
+        epoch_output  = 0.0
+        seq2_local    = None
+        seq2_global   = None
+        seq2_output   = 0.0
 
         for i, idx in enumerate(indices):
             global_step += 1
             loss, correct, sc, seq2 = model.step(images[idx], labels[idx], t=global_step)
-            epoch_loss += loss
+            epoch_loss    += loss
             epoch_correct += correct
 
             if epoch_local is None:
-                epoch_local = [0.0] * len(sc['local'])
+                epoch_local  = [0.0] * len(sc['local'])
                 epoch_global = [0.0] * len(sc['global'])
-                seq2_local = [0.0] * len(seq2['local'])
-                seq2_global = [0.0] * len(seq2['global'])
+                seq2_local   = [0.0] * len(seq2['local'])
+                seq2_global  = [0.0] * len(seq2['global'])
 
             for li, s in enumerate(sc['local']):
                 epoch_local[li] += s
@@ -94,48 +88,44 @@ def train(model, images, labels, epochs=5, print_every=500):
             seq2_output += seq2['output']
 
             if global_step % print_every == 0:
-                n_seen = i + 1
-                avg_loss = epoch_loss / n_seen
-                acc = epoch_correct / n_seen * 100
-                local_str = '+'.join(f"{s/n_seen:.0f}" for s in epoch_local)
-                global_str = '+'.join(f"{s/n_seen:.0f}" for s in epoch_global)
-                out_str = f"{epoch_output/n_seen:.0f}"
-                total = (sum(epoch_local) + sum(epoch_global) + epoch_output) / n_seen
-
-                seq2_local_str = '+'.join(f"{s/n_seen:.0f}" for s in seq2_local)
-                seq2_global_str = '+'.join(f"{s/n_seen:.0f}" for s in seq2_global)
-                seq2_out_str = f"{seq2_output/n_seen:.0f}"
-                seq2_total = (sum(seq2_local) + sum(seq2_global) + seq2_output) / n_seen
-
+                n_seen        = i + 1
+                avg_loss      = epoch_loss / n_seen
+                acc           = epoch_correct / n_seen * 100
+                local_str     = '+'.join(f"{s/n_seen:.0f}" for s in epoch_local)
+                global_str    = '+'.join(f"{s/n_seen:.0f}" for s in epoch_global)
+                out_str       = f"{epoch_output/n_seen:.0f}"
+                total         = (sum(epoch_local) + sum(epoch_global) + epoch_output) / n_seen
+                seq2_l_str    = '+'.join(f"{s/n_seen:.0f}" for s in seq2_local)
+                seq2_g_str    = '+'.join(f"{s/n_seen:.0f}" for s in seq2_global)
+                seq2_out_str  = f"{seq2_output/n_seen:.0f}"
+                seq2_total    = (sum(seq2_local) + sum(seq2_global) + seq2_output) / n_seen
                 print(f"  epoch {epoch+1}/{epochs} step {i+1:>6}/{n} "
                       f"| loss {avg_loss:.4f} | acc {acc:.1f}% "
                       f"| spikes/img local[{local_str}] "
                       f"global[{global_str}] out[{out_str}] "
                       f"total={total:.0f} "
-                      f"| seq2s/img local[{seq2_local_str}] "
-                      f"global[{seq2_global_str}] out[{seq2_out_str}] "
+                      f"| seq2s/img local[{seq2_l_str}] "
+                      f"global[{seq2_g_str}] out[{seq2_out_str}] "
                       f"total={seq2_total:.0f}")
 
-        n_seen = n
-        avg_loss = epoch_loss / n_seen
-        acc = epoch_correct / n_seen * 100
-        local_str = '+'.join(f"{s/n_seen:.0f}" for s in epoch_local)
-        global_str = '+'.join(f"{s/n_seen:.0f}" for s in epoch_global)
-        out_str = f"{epoch_output/n_seen:.0f}"
-        total = (sum(epoch_local) + sum(epoch_global) + epoch_output) / n_seen
-
-        seq2_local_str = '+'.join(f"{s/n_seen:.0f}" for s in seq2_local)
-        seq2_global_str = '+'.join(f"{s/n_seen:.0f}" for s in seq2_global)
+        n_seen       = n
+        avg_loss     = epoch_loss / n_seen
+        acc          = epoch_correct / n_seen * 100
+        local_str    = '+'.join(f"{s/n_seen:.0f}" for s in epoch_local)
+        global_str   = '+'.join(f"{s/n_seen:.0f}" for s in epoch_global)
+        out_str      = f"{epoch_output/n_seen:.0f}"
+        total        = (sum(epoch_local) + sum(epoch_global) + epoch_output) / n_seen
+        seq2_l_str   = '+'.join(f"{s/n_seen:.0f}" for s in seq2_local)
+        seq2_g_str   = '+'.join(f"{s/n_seen:.0f}" for s in seq2_global)
         seq2_out_str = f"{seq2_output/n_seen:.0f}"
-        seq2_total = (sum(seq2_local) + sum(seq2_global) + seq2_output) / n_seen
-
+        seq2_total   = (sum(seq2_local) + sum(seq2_global) + seq2_output) / n_seen
         print(f"  Epoch {epoch+1}/{epochs} complete "
               f"| loss {avg_loss:.4f} | acc {acc:.1f}% "
               f"| spikes/img local[{local_str}] "
               f"global[{global_str}] out[{out_str}] "
               f"total={total:.0f} "
-              f"| seq2s/img local[{seq2_local_str}] "
-              f"global[{seq2_global_str}] out[{seq2_out_str}] "
+              f"| seq2s/img local[{seq2_l_str}] "
+              f"global[{seq2_g_str}] out[{seq2_out_str}] "
               f"total={seq2_total:.0f}")
 
         plot_confusion_matrix(model, images, labels, epoch + 1)
@@ -144,7 +134,7 @@ def train(model, images, labels, epochs=5, print_every=500):
 
 
 def evaluate(model, images, labels):
-    """Accuracy over the given set. Returns float in [0, 1]."""
+    """Accuracy over the given set."""
     correct = 0
     for image, label in zip(images, labels):
         logits, _, _, _ = model.forward(image)
@@ -156,24 +146,17 @@ def evaluate(model, images, labels):
 
 
 def main():
-    import argparse
-    parser = argparse.ArgumentParser(description="Train LUT-based MNIST classifier.")
-    parser.add_argument("--stride", type=int, default=INPUT_STRIDE,
-                        help="Pixel stride for input sampling (default: %(default)s).")
-    args = parser.parse_args()
-
     print("=" * 50)
-    print("LUT Model - MNIST Training")
+    print("FE-LUT Hybrid Model - MNIST Training")
     print("=" * 50)
-    print(f"Input stride: {args.stride}")
 
     data_dir = os.path.join(_SCRIPT_DIR, "mnist", "mnist")
     train_images, train_labels, test_images, test_labels = load_mnist(
         data_dir=data_dir, max_samples=10000
     )
 
-    print("\nInitializing LUT model...")
-    model = LUTModel(stride=args.stride)
+    print("\nInitializing FE-LUT model...")
+    model = FELUTModel()
 
     print("\nTraining...")
     train(model, train_images, train_labels, epochs=5)

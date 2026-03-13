@@ -47,18 +47,21 @@ def run_sweep(configs, n_per_class):
         print(f"\n[FE] {config_str}")
 
         t0 = time.time()
-        accuracy, mean_active_bits = evaluate_with_config(
+        accuracy, mean_active_signals, mean_seq2s = evaluate_with_config(
             n_per_class=n_per_class,
             pool_size=pool_size,
         )
         elapsed = time.time() - t0
 
-        print(f"  acc={accuracy*100:.2f}%  active_bits={mean_active_bits:.1f}  time={elapsed:.1f}s")
+        print(
+            f"  acc={accuracy*100:.2f}%  active_signals={mean_active_signals:.1f} "
+            f"seq2s={mean_seq2s:.1f}  time={elapsed:.1f}s"
+        )
         rows.append({
             "model":            "fe",
             "config":           config_str,
             "accuracy":         round(accuracy * 100, 4),
-            "active_bits_mean": round(mean_active_bits, 1),
+            "active_bits_mean": round(mean_active_signals, 1),
             "train_time_s":     0.0,
         })
 

@@ -26,6 +26,9 @@ from main import load_mnist
 from benchmark.metrics import lut_active_bits
 
 
+BIT_WIDTH = 32
+
+
 # ------------------------------------------------------------------ #
 # Sweep configurations  (N_T, EMBED_DIM, N_GRID)
 # ------------------------------------------------------------------ #
@@ -89,19 +92,49 @@ def evaluate_accuracy(model, images, labels):
     """Test accuracy as a float in [0, 100]."""
     correct = 0
     for image, label in zip(images, labels):
-        logits, _, _ = model.forward(image)
+        logits, _, _, _ = model.forward(image)
         if int(np.argmax(logits)) == label:
             correct += 1
     return 100.0 * correct / len(images)
 
 
-def measure_active_bits(model, images):
-    """Mean active bits per inference (binary comparisons + float32 LUT outputs)."""
-    total = 0
+def measure_costs(model, images):
+    """Mean active signals, seq2s, adds, and multiplies per inference."""
+    n_t = lm.N_T
+    n_regions = lm.N_GRID * lm.N_GRID
+
+    # Each LUT layer computes y as a sum over N_T selected rows:
+    # y[k] = sum_{i=0..N_T-1} S[i, j[i], k]
+    # That is (N_T - 1) scalar adds per output element, no multiplies.
+    local_adds = sum(
+        n_regions * layer.y_dim * max(n_t - 1, 0)
+        for layer in model.local_layers
+    )
+    global_adds = sum(
+        layer.y_dim * max(n_t - 1, 0)
+        for layer in model.global_layers
+    )
+    output_adds = lm.N_CLASSES * max(n_t - 1, 0)
+    adds_per_image = (local_adds + global_adds + output_adds) * BIT_WIDTH
+
+    total_active = 0
+    total_seq2s = 0
+    total_adds = 0
+    total_multiplies = 0
     for image in images:
-        logits, caches, spike_counts = model.forward(image)
-        total += lut_active_bits(spike_counts, caches['y_outputs'])
-    return total / len(images)
+        logits, caches, spike_counts, seq2s = model.forward(image)
+        total_active += lut_active_bits(spike_counts, caches['y_outputs'])
+        total_seq2s += int(seq2s['total'])
+        total_adds += int(adds_per_image)
+        total_multiplies += 0
+
+    n = len(images)
+    return {
+        "active_signals": total_active / n,
+        "seq2s": total_seq2s / n,
+        "adds": total_adds / n,
+        "multiplies": total_multiplies / n,
+    }
 
 
 # ------------------------------------------------------------------ #
@@ -129,9 +162,14 @@ def run_sweep(configs, n_train, n_test, epochs):
 
         train_time = train(model, train_imgs, train_lbls, epochs)
         accuracy   = evaluate_accuracy(model, test_imgs, test_lbls)
-        mean_bits  = measure_active_bits(model, test_imgs)
+        mean_costs = measure_costs(model, test_imgs)
+        mean_bits = mean_costs["active_signals"]
 
-        print(f"  acc={accuracy:.2f}%  active_bits={mean_bits:.0f}  time={train_time:.1f}s")
+        print(
+            f"  acc={accuracy:.2f}%  active_signals={mean_costs['active_signals']:.0f} "
+            f"seq2s={mean_costs['seq2s']:.0f} adds={mean_costs['adds']:.0f} "
+            f"multiplies={mean_costs['multiplies']:.0f} time={train_time:.1f}s"
+        )
         rows.append({
             "model":            "lut",
             "config":           config_str,

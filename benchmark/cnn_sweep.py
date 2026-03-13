@@ -27,7 +27,6 @@ _RESULTS    = os.path.join(_VEETHREE, "results")
 sys.path.insert(0, _VEETHREE)
 
 from conventional_cnn import ConventionalCNN
-from benchmark.metrics import cnn_active_bits
 
 
 # ------------------------------------------------------------------ #
@@ -114,22 +113,30 @@ def evaluate_accuracy(model: ConventionalCNN, loader: DataLoader, device: torch.
     return 100.0 * correct / total
 
 
-def measure_active_bits(model: ConventionalCNN, loader: DataLoader, device: torch.device) -> float:
-    """Return mean active bits per inference across the test set."""
+def measure_costs(model: ConventionalCNN, loader: DataLoader, device: torch.device) -> dict[str, float]:
+    """Return mean per-image cost counters across the test set."""
     model.register_cost_hooks()
     model.eval()
-    total_bits = 0
+    totals = {
+        "active_signals": 0,
+        "seq2s": 0,
+        "adds": 0,
+        "multiplies": 0,
+    }
     total_images = 0
     with torch.no_grad():
         for x, y in loader:
             x = x.to(device)
             for i in range(x.size(0)):
-                model.reset_active_bits()
+                model.reset_costs()
                 model(x[i:i+1])
-                total_bits += model.get_active_bits()
+                costs = model.get_costs()
+                for key in totals:
+                    totals[key] += costs[key]
                 total_images += 1
     model.remove_cost_hooks()
-    return total_bits / max(total_images, 1)
+    denom = max(total_images, 1)
+    return {k: v / denom for k, v in totals.items()}
 
 
 # ------------------------------------------------------------------ #
@@ -152,9 +159,14 @@ def run_sweep(configs, n_train, n_test, epochs, device):
 
         train_time = train_model(model, train_loader, epochs, device)
         accuracy   = evaluate_accuracy(model, test_loader, device)
-        mean_bits  = measure_active_bits(model, test_loader, device)
+        mean_costs = measure_costs(model, test_loader, device)
+        mean_bits = mean_costs["active_signals"]
 
-        print(f"  acc={accuracy:.2f}%  active_bits={mean_bits:.0f}  time={train_time:.1f}s")
+        print(
+            f"  acc={accuracy:.2f}%  active_signals={mean_costs['active_signals']:.0f} "
+            f"seq2s={mean_costs['seq2s']:.0f} adds={mean_costs['adds']:.0f} "
+            f"multiplies={mean_costs['multiplies']:.0f} time={train_time:.1f}s"
+        )
         rows.append({
             "model":            "cnn",
             "config":           config_str,

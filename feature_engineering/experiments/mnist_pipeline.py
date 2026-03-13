@@ -63,11 +63,12 @@ def run_pipeline_with_config(
     image: np.ndarray,
     pool_size: int = 2,
     n_active_dirs: int = 8,
-) -> tuple[np.ndarray, list[int]]:
+) -> tuple[np.ndarray, list[int], int]:
     """Run stages 1-4 with configurable pool size and number of active directions.
 
-    Returns (combined_map, stage_signal_counts) where
+    Returns (combined_map, stage_signal_counts, seq2_count) where
     stage_signal_counts[i] = count of finite (active) signals after stage i+1.
+    seq2_count = sum over active sweep detectors of (len(pattern) - 1).
     """
     v1, d1 = edge_detection(image)
 
@@ -89,29 +90,43 @@ def run_pipeline_with_config(
     combined = np.concatenate([hm, vm], axis=2)
     count_s4 = int(np.isfinite(combined).sum())
 
-    return combined, [count_s1, count_s2, count_s3, count_s4]
+    seq2_count = 0
+    for idx, detector in enumerate(H_DETECTORS):
+        if np.isfinite(hm[:, :, idx]).any():
+            seq2_count += max(len(detector.pattern) - 1, 0)
+    for idx, detector in enumerate(V_DETECTORS):
+        if np.isfinite(vm[:, :, idx]).any():
+            seq2_count += max(len(detector.pattern) - 1, 0)
+
+    return combined, [count_s1, count_s2, count_s3, count_s4], seq2_count
 
 
 def evaluate_with_config(
     n_per_class: int | None,
     pool_size: int = 2,
     n_active_dirs: int = 8,
-) -> tuple[float, float]:
-    """Evaluate pipeline with given config. Returns (accuracy, mean_active_bits)."""
+) -> tuple[float, float, float]:
+    """Evaluate pipeline with given config.
+
+    Returns (accuracy, mean_active_signals, mean_seq2s).
+    """
     samples = load_dataset(n_per_class)
     correct = 0
-    total_active_bits = 0
+    total_active_signals = 0
+    total_seq2s = 0
 
     for image, label in samples:
-        combined, stage_counts = run_pipeline_with_config(image, pool_size, n_active_dirs)
+        combined, stage_counts, seq2_count = run_pipeline_with_config(image, pool_size, n_active_dirs)
         predicted, _ = classify(combined)
         if predicted == label:
             correct += 1
-        total_active_bits += sum(stage_counts)
+        total_active_signals += sum(stage_counts)
+        total_seq2s += seq2_count
 
     accuracy = correct / len(samples)
-    mean_active_bits = total_active_bits / len(samples)
-    return accuracy, mean_active_bits
+    mean_active_signals = total_active_signals / len(samples)
+    mean_seq2s = total_seq2s / len(samples)
+    return accuracy, mean_active_signals, mean_seq2s
 
 
 # ------------------------------------------------------------------ #
